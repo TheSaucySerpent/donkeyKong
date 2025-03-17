@@ -8,3 +8,6 @@ class SpriteSheet:
     sprite = pygame.Surface((width, height), pygame.SRCALPHA)
     sprite.blit(self.spritesheet, (0, 0), (x, y, width, height))
     return sprite
+  
+  def flip_image(image):
+    return pygame.transform.flip(image,True, False)

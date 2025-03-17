@@ -20,7 +20,7 @@ while running:
   
   keys = pygame.key.get_pressed() # get the pressed keys
   mario.handle_movement(keys) # handle Mario's movement
-
+  mario.animation()
   screen.fill((0, 0, 0)) # fill the screen with black
   mario.draw(screen) # draw Mario
 
