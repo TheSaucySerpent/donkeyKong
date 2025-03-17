@@ -1,76 +1,79 @@
 import pygame
-from spritesheet import SpriteSheet
+from Box2D import b2
+from sprite import SpriteSheet
+
+# Constants for Mario
+SPRITE_COORDS = {
+    "idle":  (2, 1),
+    "walk1": (18, 1),
+    "walk2": (36, 1),
+    "jump":  (55, 1),
+}
+MOVE_SPEED = 4
 
 class Mario:
-  def __init__(self, x, y):
-    self.spritesheet = SpriteSheet("assets/sprites.png") # load sprite sheet
+    def __init__(self, x, y):
+        self.spritesheet = SpriteSheet("assets/sprites.png")  # load the spritesheet
 
+        # Mario's starting position
+        self.x = x
+        self.y = y
 
-    self.mario_idle = self.spritesheet.get_sprite(2, 1, 16, 16)  # get sprite
-    self.mario_idle = pygame.transform.scale(self.mario_idle, (64, 64)) # scale sprite
-    self.mario_idle_flipped = SpriteSheet.flip_image(self.mario_idle)
+        # load Mario's sprites
+        self.mario_idle, self.mario_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["idle"])
+        self.mario_walk_1, self.mario_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["walk1"])
+        self.mario_walk_2, self.mario_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["walk2"])
+        self.mario_jump, self.mario_jump_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["jump"])
 
-    # Mario Walk Sprites
-    self.mario_walk_1 = self.spritesheet.get_sprite(18, 1, 16, 16)
-    self.mario_walk_1 = pygame.transform.scale(self.mario_walk_1, (64, 64)) # scale sprite
-    self.mario_walk_1_flipped = SpriteSheet.flip_image(self.mario_walk_1)
+        # create a list of frames for animations
+        self.mario_walk_animation = [self.mario_walk_1, self.mario_walk_2]
+        self.mario_walk_animation_flipped = [self.mario_walk_1_flipped, self.mario_walk_2_flipped]
 
-    self.mario_walk_2 = self.spritesheet.get_sprite(36, 1, 16, 16)
-    self.mario_walk_2 = pygame.transform.scale(self.mario_walk_2, (64, 64)) # scale sprite
-    self.mario_walk_2_flipped = SpriteSheet.flip_image(self.mario_walk_2)
-
-    self.mario_walk_animation = [self.mario_walk_1,self.mario_walk_2]
-    self.mario_walk_animation_flipped = [self.mario_walk_1_flipped,self.mario_walk_2_flipped]
-
-    self.mario_current_walk_frame = 0
-    self.mario_walk_frames = 5
-    
-    self.mario_is_facing_right = True
-    self.mario_is_walking = False
-
-    self.move_index = 0
-
-    self.image = self.mario_idle
-
-    self.x = x
-    self.y = y
-    self.speed = 5
-
-
-  
-  def animation(self):
-    if self.mario_is_walking:
-      self.mario_current_walk_frame += 1
-      if self.mario_current_walk_frame >= self.mario_walk_frames:
-        self.mario_current_walk_frame = 0
-        self.move_index += 1
-        self.move_index %= 2
-      
-      if self.mario_is_facing_right:
-        self.image = self.mario_walk_animation[self.move_index]
-      else:
-        self.image = self.mario_walk_animation_flipped[self.move_index]
-    else:
-      if self.mario_is_facing_right: 
+        # default image is the idle sprite
         self.image = self.mario_idle
-      else:
-        self.image = self.mario_idle_flipped
-      
 
+        # movement/animation state
+        self.is_facing_right = True
+        self.is_walking = False
+        self.is_jumping = False
+        self.move_index = 0
+        self.current_walk_frame = 0
 
-  def handle_movement(self, keys):
-    self.mario_is_walking = False
+    def update_animation(self):
+        # default to idle
+        self.image = self.mario_idle if self.is_facing_right else self.mario_idle_flipped
 
-    if keys[pygame.K_LEFT]:
-      self.x -= self.speed
-      self.mario_is_facing_right = False
-      self.mario_is_walking = True
+        if self.is_walking:
+            self.current_walk_frame += 1
+            if self.current_walk_frame >= 5:
+                self.current_walk_frame = 0
+                self.move_index = (self.move_index + 1) % len(self.mario_walk_animation)
+            self.image = (
+                self.mario_walk_animation[self.move_index]
+                if self.is_facing_right
+                else self.mario_walk_animation_flipped[self.move_index]
+            )
+        if self.is_jumping:
+            self.image = self.mario_jump if self.is_facing_right else self.mario_jump_flipped
 
-    if keys[pygame.K_RIGHT]:
-      self.x += self.speed
-      self.mario_is_facing_right = True
-      self.mario_is_walking = True
-    
+    def handle_movement(self, keys):
+        self.is_walking = False
+        self.is_jumping = False
 
-  def draw(self, screen):
-    screen.blit(self.image, (self.x, self.y))
+        if keys[pygame.K_LEFT]:
+            self.x -= MOVE_SPEED
+            self.is_facing_right = False
+            self.is_walking = True
+        elif keys[pygame.K_RIGHT]:
+            self.x += MOVE_SPEED
+            self.is_facing_right = True
+            self.is_walking = True
+
+        if keys[pygame.K_UP]:
+            self.y -= MOVE_SPEED
+            self.is_jumping = True
+        
+        self.update_animation() # update animation accordlingly
+
+    def draw(self, screen):
+        screen.blit(self.image, (self.x, self.y))

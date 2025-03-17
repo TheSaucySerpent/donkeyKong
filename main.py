@@ -2,6 +2,10 @@ import pygame
 import sys
 from characters.mario import Mario
 
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+
 # initialize pygame
 pygame.init()
 
@@ -19,13 +23,14 @@ while running:
       running = False
   
   keys = pygame.key.get_pressed() # get the pressed keys
+
   mario.handle_movement(keys) # handle Mario's movement
-  mario.animation()
+
   screen.fill((0, 0, 0)) # fill the screen with black
   mario.draw(screen) # draw Mario
 
   pygame.display.update() # update the display
-  pygame.time.Clock().tick(60) # limit the frame rate to 60 FPS
+  pygame.time.Clock().tick(FPS) # limit the frame rate to 60 FPS
 
 pygame.quit()
 sys.exit()
