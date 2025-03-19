@@ -1,6 +1,7 @@
 import pygame
 import sys
 from characters.mario import Mario
+from stage_creator import create_stage1
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -15,6 +16,7 @@ pygame.display.set_caption("Donkey Kong")
 
 # create Mario
 mario = Mario(512, 359)
+stage = create_stage1()
 
 running = True # variable to control the game loop
 while running:
@@ -27,6 +29,7 @@ while running:
   mario.handle_movement(keys) # handle Mario's movement
 
   screen.fill((0, 0, 0)) # fill the screen with black
+  stage.draw(screen) # draw stage
   mario.draw(screen) # draw Mario
 
   pygame.display.update() # update the display

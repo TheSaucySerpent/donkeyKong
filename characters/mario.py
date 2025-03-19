@@ -72,6 +72,9 @@ class Mario:
         if keys[pygame.K_UP]:
             self.y -= MOVE_SPEED
             self.is_jumping = True
+        if keys[pygame.K_DOWN]:
+            self.y += MOVE_SPEED
+            self.is_jumping = True
         
         self.update_animation() # update animation accordlingly
 

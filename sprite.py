@@ -17,10 +17,10 @@ class SpriteSheet:
 
   # load_sprite now uses get_sprite to extract the raw image, then scales and flips it.
   # pos is assumed to be grid coordinates that need conversion to pixel coordinates.
-  def load_sprite(self, pos):
+  def load_sprite(self, pos, sprite_width=SPRITE_WIDTH, sprite_height=SPRITE_HEIGHT, sprite_scale=SPRITE_SCALE):
     x, y = pos
 
-    sprite = self.get_sprite(x, y, SPRITE_WIDTH, SPRITE_HEIGHT) # extract the sprite
-    sprite = pygame.transform.scale(sprite, SPRITE_SCALE)       # scale the sprite.
+    sprite = self.get_sprite(x, y, sprite_width, sprite_height) # extract the sprite
+    sprite = pygame.transform.scale(sprite, sprite_scale)       # scale the sprite.
     flipped_sprite = pygame.transform.flip(sprite, True, False) # create a flipped sprite
     return sprite, flipped_sprite                               # return both sprites
