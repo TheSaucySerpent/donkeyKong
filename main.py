@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((1024, 768))
 pygame.display.set_caption("Donkey Kong")
 
 # create Mario
-mario = Mario(512, 359)
+mario = Mario(100, 635)
 stage = create_stage1()
 
 running = True # variable to control the game loop

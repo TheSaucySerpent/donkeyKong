@@ -2,9 +2,12 @@ from stage import Stage
 
 def create_stage1():
     stage = Stage()
-    stage.add_element("beam", (300, 200), (128, 32))
-    stage.add_element("beam", (275, 140), (128, 32))
-    stage.add_element("oil_barrel", (250, 150))
+
+    for i in range(15):
+        stage.add_element("beam", (128*i, 700), (128, 32))
+
+    stage.add_element("oil_barrel", (25, 635)) # oil barrel on bottom left
+    
     return stage
 
 def create_stage2():

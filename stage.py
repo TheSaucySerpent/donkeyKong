@@ -4,6 +4,7 @@ from sprite import SpriteSheet
 # Constants for Stages
 SPRITE_COORDS = {
     "beam": (109, 215, 16, 7),
+    "ladder": (40, 211, 10, 16),
     "oil_barrel": (145, 193, 16, 16),
 }
 
