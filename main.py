@@ -14,9 +14,8 @@ pygame.init()
 screen = pygame.display.set_mode((1024, 768))
 pygame.display.set_caption("Donkey Kong")
 
-# create Mario
-mario = Mario(150, 635)
-stage = create_stage1()
+# create stage and characters
+stage, characters, world = create_stage1()
 
 running = True # variable to control the game loop
 while running:
@@ -26,11 +25,17 @@ while running:
   
   keys = pygame.key.get_pressed() # get the pressed keys
 
-  mario.handle_movement(keys) # handle Mario's movement
+  characters["mario"].handle_movement(keys) # handle Mario's movement
+
+  # Step the Box2D world simulation
+  world.Step(1/60.0, 6, 2)
 
   screen.fill((0, 0, 0)) # fill the screen with black
   stage.draw(screen) # draw stage
-  mario.draw(screen) # draw Mario
+  
+  # Draw all characters
+  for character in characters.values():
+    character.draw(screen)
 
   pygame.display.update() # update the display
   pygame.time.Clock().tick(FPS) # limit the frame rate to 60 FPS

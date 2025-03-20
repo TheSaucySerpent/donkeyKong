@@ -1,6 +1,9 @@
 import pygame
-from Box2D import b2
 from sprite import SpriteSheet
+from Box2D import b2BodyDef, b2_dynamicBody, b2PolygonShape
+
+# Conversion favor from Box2D meters to pixels
+PIXELS_PER_METER = 30.0
 
 # Constants for Mario
 SPRITE_COORDS = {
@@ -12,12 +15,8 @@ SPRITE_COORDS = {
 MOVE_SPEED = 4
 
 class Mario:
-    def __init__(self, x, y):
+    def __init__(self, x, y, world):
         self.spritesheet = SpriteSheet("assets/sprites.png")  # load the spritesheet
-
-        # Mario's starting position
-        self.x = x
-        self.y = y
 
         # load Mario's sprites
         self.mario_idle, self.mario_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["idle"])
@@ -38,6 +37,13 @@ class Mario:
         self.is_jumping = False
         self.move_index = 0
         self.current_walk_frame = 0
+
+        # Create a Box2d dynamic body for Mario
+        # Convert the  initial pixel position to Box2D world coordinates
+        self.body = world.CreateDynamicBody(position=(x / PIXELS_PER_METER, y / PIXELS_PER_METER))
+        self.width = self.image.get_width() / PIXELS_PER_METER
+        self.height = self.image.get_height() / PIXELS_PER_METER
+        self.body.CreatePolygonFixture(box=(self.width, self.height), density=1.0, friction=0.3)
 
     def update_animation(self):
         # default to idle
@@ -60,23 +66,31 @@ class Mario:
         self.is_walking = False
         self.is_jumping = False
 
+        # base horizontal speed
+        velocity = self.body.linearVelocity
+
         if keys[pygame.K_LEFT]:
-            self.x -= MOVE_SPEED
+            self.body.linearVelocity = (-MOVE_SPEED, velocity.y)
             self.is_facing_right = False
             self.is_walking = True
         elif keys[pygame.K_RIGHT]:
-            self.x += MOVE_SPEED
+            self.body.linearVelocity = (MOVE_SPEED, velocity.y)
             self.is_facing_right = True
             self.is_walking = True
+        else:
+            # add dampening so Mario slows down when not moving
+            self.body.linearVelocity = (0, velocity.y)
 
         if keys[pygame.K_UP]:
-            self.y -= MOVE_SPEED
-            self.is_jumping = True
-        if keys[pygame.K_DOWN]:
-            self.y += MOVE_SPEED
+            self.body.ApplyLinearImpulse((0, 10), self.body.worldCenter, True)
             self.is_jumping = True
         
         self.update_animation() # update animation accordlingly
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        # conver Box2D world coordinates back to pixel coordinates
+        pos = self.body.position
+        x = pos.x * PIXELS_PER_METER - self.image.get_width() / 2
+        y = pos.y * PIXELS_PER_METER - self.image.get_height() / 2
+
+        screen.blit(self.image, (x, y))
