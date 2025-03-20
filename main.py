@@ -1,8 +1,8 @@
 import pygame
 import sys
-from characters.mario import Mario
 from stage_creator import create_stage1
 
+# constants for screen dimensions and FPS
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
@@ -14,12 +14,14 @@ pygame.init()
 screen = pygame.display.set_mode((1024, 768))
 pygame.display.set_caption("Donkey Kong")
 
-# create stage and characters
+# create stage and characters (initially only 1 stage, will add more later)
 stage, characters, world = create_stage1()
 
 running = True # variable to control the game loop
 while running:
+  # get pygame events
   for event in pygame.event.get():
+    # handle quit event
     if event.type == pygame.QUIT:
       running = False
   
@@ -27,18 +29,20 @@ while running:
 
   characters["mario"].handle_movement(keys) # handle Mario's movement
 
-  # Step the Box2D world simulation
-  world.Step(1/60.0, 6, 2)
+  # update the physics world
+  world.Step(1.0 / 50.0, 6, 2)
+  world.ClearForces()
 
-  screen.fill((0, 0, 0)) # fill the screen with black
-  stage.draw(screen) # draw stage
+  screen.fill((0, 0, 0)) # fill the screen (black background)
+  stage.draw(screen, SCREEN_HEIGHT) # draw stage
   
   # Draw all characters
   for character in characters.values():
-    character.draw(screen)
+    character.draw(screen, SCREEN_HEIGHT)
 
   pygame.display.update() # update the display
   pygame.time.Clock().tick(FPS) # limit the frame rate to 60 FPS
 
+# gracefully quit pygame and exit program
 pygame.quit()
 sys.exit()
