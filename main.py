@@ -34,11 +34,11 @@ while running:
   world.ClearForces()
 
   screen.fill((0, 0, 0)) # fill the screen (black background)
-  stage.draw(screen, SCREEN_HEIGHT) # draw stage
+  stage.draw(screen) # draw stage
   
   # Draw all characters
   for character in characters.values():
-    character.draw(screen, SCREEN_HEIGHT)
+    character.draw(screen)
 
   pygame.display.update() # update the display
   pygame.time.Clock().tick(FPS) # limit the frame rate to 60 FPS

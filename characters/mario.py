@@ -1,7 +1,7 @@
 import pygame
 from sprite import SpriteSheet
 from Box2D import b2BodyDef, b2_dynamicBody, b2PolygonShape
-from box2d_helper import meters_to_pixels, pixels_to_meters
+from conversions import *
 
 # Constants for Mario
 SPRITE_COORDS = {
@@ -36,13 +36,18 @@ class Mario:
         self.move_index = 0
         self.current_walk_frame = 0
 
-        # Create a Box2d dynamic body for Mario
-        # Convert the initial pixel position to Box2D world coordinates
-        self.body = world.CreateDynamicBody(position=(pixels_to_meters(x, y)))
-        self.width = self.image.get_width()
-        self.height = self.image.get_height()
+        # create Mario's physics body
+        self.body = world.CreateDynamicBody(
+            position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+            type=b2_dynamicBody,
+        )
 
-        self.body.CreatePolygonFixture(box=(self.width, self.height), density=1.0, friction=0.3)
+        self.body.CreateFixture(
+            shape=b2PolygonShape(box=(64/PPM, 64/PPM)),
+            density=1.0,
+            friction=0.3,
+            restitution=0.0,
+        )
 
     def update_animation(self):
         # default to idle
@@ -86,10 +91,6 @@ class Mario:
         
         self.update_animation() # update animation accordlingly
 
-    def draw(self, screen, screen_height):
-        pos = self.body.position
-        x, y = meters_to_pixels(pos.x, pos.y)
-        # Adjust x and y so that Mario is centered (subtract half the image dimensions)
-        x -= self.image.get_width() // 2
-        y -= self.image.get_height() // 2
-        screen.blit(self.image, (x, y))
+    def draw(self, screen):
+        pos = box2d_to_sdl(self.body.position.x, self.body.position.y)
+        screen.blit(self.image, pos)

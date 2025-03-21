@@ -24,18 +24,14 @@ class Stage:
   def add_element(self, sprite_key, pos, scale=(64, 64)):
     self.elements.append({"sprite": sprite_key, "pos": pos, "scale": scale})
   
-  def draw(self, screen, screen_height):
-    for element in self.elements:
-        sprite_key = element["sprite"]
-        pos = element["pos"]
-        scale = element["scale"]
-        sprite = self.sprites[sprite_key]
-        sprite = pygame.transform.scale(sprite, scale)
+  def draw(self, screen):
+      for element in self.elements:
+          sprite_key = element["sprite"]
+          center = element["pos"]  # Center-based position.
+          scale = element["scale"]
+          sprite = self.sprites[sprite_key]
+          sprite = pygame.transform.scale(sprite, scale)
 
-        
-        # Convert Box2D position to Pygame screen coordinates
-        # Since Box2D origin is at bottom-left of screen and
-        # Pygame origin is at the top left of the screen
-        sdl_x, sdl_y = int(pos[0]), int(pos[1])
-
-        screen.blit(sprite, (sdl_x, sdl_y))
+          # Convert center position to top-left by subtracting half of the scale dimensions.
+          top_left = (int(center[0] - scale[0] / 2), int(center[1] - scale[1] / 2))
+          screen.blit(sprite, top_left)
