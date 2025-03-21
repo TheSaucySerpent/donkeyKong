@@ -1,6 +1,6 @@
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-FPS = 60000000000
+FPS = 60
 PPM = 32
 
 def box2d_to_sdl(x, y):
