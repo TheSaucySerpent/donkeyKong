@@ -1,5 +1,6 @@
 import pygame
 from sprite import SpriteSheet
+from conversions import *
 
 # Constants for Stages
 SPRITE_COORDS = {
@@ -25,13 +26,12 @@ class Stage:
     self.elements.append({"sprite": sprite_key, "pos": pos, "scale": scale})
   
   def draw(self, screen):
-      for element in self.elements:
-          sprite_key = element["sprite"]
-          center = element["pos"]  # Center-based position.
-          scale = element["scale"]
-          sprite = self.sprites[sprite_key]
-          sprite = pygame.transform.scale(sprite, scale)
+    for element in self.elements:
+      sprite_key = element["sprite"]
+      pos = element["pos"]
+      scale = element["scale"]
+      sprite = self.sprites[sprite_key]
+      sprite = pygame.transform.scale(sprite, scale)
 
-          # Convert center position to top-left by subtracting half of the scale dimensions.
-          top_left = (int(center[0] - scale[0] / 2), int(center[1] - scale[1] / 2))
-          screen.blit(sprite, top_left)
+      pos = box2d_to_sdl(self.body.position.x, self.body.position.y)
+      screen.blit(sprite, pos)

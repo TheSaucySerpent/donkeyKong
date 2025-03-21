@@ -1,17 +1,13 @@
 import pygame
 import sys
 from stage_creator import create_stage1
-
-# constants for screen dimensions and FPS
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FPS = 60
+from conversions import *
 
 # initialize pygame
 pygame.init()
 
 # create the screen
-screen = pygame.display.set_mode((1024, 768))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Donkey Kong")
 
 # create stage and characters (initially only 1 stage, will add more later)

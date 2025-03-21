@@ -38,12 +38,12 @@ class Mario:
 
         # create Mario's physics body
         self.body = world.CreateDynamicBody(
-            position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
+            position=(x, y),
             type=b2_dynamicBody,
         )
 
         self.body.CreateFixture(
-            shape=b2PolygonShape(box=(64/PPM, 64/PPM)),
+            shape=b2PolygonShape(box=(x / PPM, y / PPM)),
             density=1.0,
             friction=0.3,
             restitution=0.0,
@@ -86,7 +86,7 @@ class Mario:
             self.body.linearVelocity = (0, velocity.y)
 
         if keys[pygame.K_UP]:
-            self.body.ApplyLinearImpulse((0, 10), self.body.worldCenter, True)
+            self.body.ApplyLinearImpulse((0, 100), self.body.worldCenter, True)
             self.is_jumping = True
         
         self.update_animation() # update animation accordlingly
