@@ -43,7 +43,7 @@ class Mario:
         )
 
         self.body.CreateFixture(
-            shape=b2PolygonShape(box=(x / PPM, y / PPM)),
+            shape=b2PolygonShape(box=(64 / 2, 64 / 2)),
             density=1.0,
             friction=0.3,
             restitution=0.0,
@@ -92,5 +92,9 @@ class Mario:
         self.update_animation() # update animation accordlingly
 
     def draw(self, screen):
+        # Convert Box2D coordinates back to screen coordinates
         pos = box2d_to_sdl(self.body.position.x, self.body.position.y)
+
+        # Center the sprite on the physics body
+        pos = (pos[0] - 64 / 2, pos[1] - 64 / 2)  # Adjust based on sprite size
         screen.blit(self.image, pos)
