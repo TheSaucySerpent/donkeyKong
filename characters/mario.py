@@ -124,7 +124,6 @@ class Mario:
             self.body.linearVelocity = (MOVE_SPEED / PPM, velocity.y)
             self.is_facing_right = True
             self.is_walking = True
-            self.game_state.lose_life()
         else:
             self.body.linearVelocity = (0, velocity.y)
 
