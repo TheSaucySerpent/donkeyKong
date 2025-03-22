@@ -84,25 +84,35 @@ class Stage:
     # return the x and y of the last beam created
     return beam_x, beam_y
 
-  def create_ladder(self, x, y):
-    ladder_width, ladder_height = self.sprites["ladder"].get_size()
+  def create_ladder(self, x, y, double_ladder=False):
+    def add_ladder(x_pos, y_pos):
+        ladder_width, ladder_height = self.sprites["ladder"].get_size()
 
-    box2d_x = x/PPM
-    box2d_y = (SCREEN_HEIGHT-y)/ PPM
+        box2d_x = x_pos / PPM
+        box2d_y = (SCREEN_HEIGHT - y_pos) / PPM
 
-    ladder_body = self.world.CreateStaticBody(position=(box2d_x, box2d_y))
-    ladder_fixture = ladder_body.CreateFixture(
-        shape=b2PolygonShape(box=(ladder_width / 2 / PPM, ladder_height / 2 / PPM)),
-        isSensor=True
-    )
+        # Create the ladder as a static body
+        ladder_body = self.world.CreateStaticBody(position=(box2d_x, box2d_y))
+        ladder_fixture = ladder_body.CreateFixture(
+            shape=b2PolygonShape(box=(ladder_width / 2 / PPM, ladder_height / 2 / PPM)),
+            isSensor=True
+        )
 
-    # add collision filtering
-    filterdata = ladder_fixture.filterData
-    filterdata.categoryBits = LADDER_CATEGORY_BITS
-    filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
-    ladder_fixture.filterData = filterdata
+        # Add collision filtering
+        filterdata = ladder_fixture.filterData
+        filterdata.categoryBits = LADDER_CATEGORY_BITS
+        filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
+        ladder_fixture.filterData = filterdata
 
-    self.add_element("ladder", (x, y))
+        self.add_element("ladder", (x_pos, y_pos))
+
+    # Create the first ladder
+    add_ladder(x, y)
+
+    # Create the second ladder if double_ladder is True
+    if double_ladder:
+        add_ladder(x, y - self.sprites["ladder"].get_size()[1])  # Stack on top of the first ladder
+
 
   def create_stacked_barrels(self, x, y):
     upright_barrel_width, upright_barrel_height = self.sprites["upright_barrel"].get_size()
@@ -154,16 +164,43 @@ def create_stages():
   beam_x = 0
   beam_y += 10
   beam_x, _ = stage1.create_beam_row(beam_x, beam_y, 9, SlopeDirection.NO_SLOPE)
-  stage1.create_beam_row(beam_x+beam_width, beam_y, 6, SlopeDirection.SLOPE_DOWN)
+  stage1.create_beam_row(beam_x+beam_width, beam_y, 5, SlopeDirection.SLOPE_DOWN)
 
   # create upright barrels next to Donkey Kong
   _, upright_barrel_height = stage1.sprites["upright_barrel"].get_size()
   stage1.create_stacked_barrels(0, beam_y-upright_barrel_height)
   
-  # Create ladder right in front of Mario
-  ladder_x = beam_width * 4  # Adjust this for the correct position
-  ladder_y = SCREEN_HEIGHT - 100      # Adjust this based on your layout
-  stage1.create_ladder(ladder_x, ladder_y)
+  # create ladders
+
+  # first floor ladders
+  ladder_x = beam_width * 13
+  ladder_y = SCREEN_HEIGHT - 100
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+  
+  # second floor ladders
+  ladder_x = beam_width * 3
+  ladder_y -= 115
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+  ladder_x = beam_width * 8
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+
+  # third floor ladders
+  ladder_X = beam_width * 9
+  ladder_y -= 100
+  stage1.create_ladder(ladder_X, ladder_y, double_ladder=True)
+  ladder_x = beam_width * 13
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+
+  # fourth floor ladders
+  ladder_x = beam_width * 4
+  ladder_y -= 100
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+
+  # fifth floor ladders
+  ladder_x = beam_width * 13
+  ladder_y -= 100
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
+
 
   stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
 
