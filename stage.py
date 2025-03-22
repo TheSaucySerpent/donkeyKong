@@ -113,6 +113,12 @@ class Stage:
     if double_ladder:
         add_ladder(x, y - self.sprites["ladder"].get_size()[1])  # Stack on top of the first ladder
 
+  def create_pauline_platform(self, x, y):
+    beam_width, _ = self.sprites["beam"].get_size()
+    beam_x, beam_y = self.create_beam_row(x, y, 3, SlopeDirection.NO_SLOPE)
+    ladder_x = beam_x + beam_width
+    ladder_y = beam_y + self.sprites["ladder"].get_size()[1] / 2
+    self.create_ladder(ladder_x, ladder_y, double_ladder=True)
 
   def create_stacked_barrels(self, x, y):
     upright_barrel_width, upright_barrel_height = self.sprites["upright_barrel"].get_size()
@@ -201,6 +207,8 @@ def create_stages():
   ladder_y -= 100
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
 
+  # create Pauline platform
+  stage1.create_pauline_platform(beam_width*5, 70)
 
   stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
 
