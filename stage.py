@@ -16,7 +16,7 @@ SPRITE_COORDS = {
 }
 
 # for creation of the beams
-SLOPE = 2 
+SLOPE = 1
 class SlopeDirection(Enum):
   NO_SLOPE = 0
   SLOPE_UP = 1
@@ -83,6 +83,15 @@ class Stage:
 
     # return the x and y of the last beam created
     return beam_x, beam_y
+
+  def create_stacked_barrels(self, x, y):
+    upright_barrel_width, upright_barrel_height = self.sprites["upright_barrel"].get_size()
+
+    for row in range(2):
+      for col in range(2):
+        barrel_x = x + col * upright_barrel_width
+        barrel_y = y - row * upright_barrel_height
+        self.add_static_object("upright_barrel", barrel_x, barrel_y)
   
   def draw(self, screen):
     """draw the stage and all of its elements"""
@@ -105,22 +114,32 @@ def create_stages():
   stage1.create_beam_row(beam_x+beam_width, beam_y, 8, SlopeDirection.SLOPE_UP)
   stage1.add_static_object("oil_barrel", beam_width, beam_y - oil_barrel_height)
 
-  # second row of beams, all slope_down
-  vertical_spacing = 80
-  beam_y -= 100
-  for i in range(5):
+  # create slanted beams (alternating slope directions)
+  vertical_spacing = 100
+  beam_y -= 125
+  for i in range(4):
     if i % 2 == 0:
       beam_x = 0
       slope_direction = SlopeDirection.SLOPE_DOWN
-      _, beam_y = stage1.create_beam_row(beam_x, beam_y, 15, slope_direction)
+      _, beam_y = stage1.create_beam_row(beam_x, beam_y, 14, slope_direction)
 
     else:
-      beam_x = beam_width
+      beam_x = beam_width*2
       slope_direction = SlopeDirection.SLOPE_UP
       _, beam_y = stage1.create_beam_row(beam_x, beam_y, 15, slope_direction)
     
     beam_y -= vertical_spacing
+  
+  # create final row (which holds Donkey Kong) - half flat, half slope down
+  beam_x = 0
+  beam_y += 10
+  beam_x, _ = stage1.create_beam_row(beam_x, beam_y, 9, SlopeDirection.NO_SLOPE)
+  stage1.create_beam_row(beam_x+beam_width, beam_y, 6, SlopeDirection.SLOPE_DOWN)
 
+  # create upright barrels next to Donkey Kong
+  _, upright_barrel_height = stage1.sprites["upright_barrel"].get_size()
+  stage1.create_stacked_barrels(0, beam_y-upright_barrel_height)
+  
   stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
 
   return [stage1]
