@@ -2,7 +2,7 @@ import pygame
 from sprite import SpriteSheet
 from conversions import *
 from Box2D import b2World, b2PolygonShape, b2EdgeShape
-from game_defines import SCREEN_WIDTH, SCREEN_HEIGHT
+from game_defines import *
 from characters.mario import Mario
 from enum import Enum
 
@@ -84,6 +84,26 @@ class Stage:
     # return the x and y of the last beam created
     return beam_x, beam_y
 
+  def create_ladder(self, x, y):
+    ladder_width, ladder_height = self.sprites["ladder"].get_size()
+
+    box2d_x = x/PPM
+    box2d_y = (SCREEN_HEIGHT-y)/ PPM
+
+    ladder_body = self.world.CreateStaticBody(position=(box2d_x, box2d_y))
+    ladder_fixture = ladder_body.CreateFixture(
+        shape=b2PolygonShape(box=(ladder_width / 2 / PPM, ladder_height / 2 / PPM)),
+        isSensor=True
+    )
+
+    # add collision filtering
+    filterdata = ladder_fixture.filterData
+    filterdata.categoryBits = LADDER_CATEGORY_BITS
+    filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
+    ladder_fixture.filterData = filterdata
+
+    self.add_element("ladder", (x, y))
+
   def create_stacked_barrels(self, x, y):
     upright_barrel_width, upright_barrel_height = self.sprites["upright_barrel"].get_size()
 
@@ -140,6 +160,11 @@ def create_stages():
   _, upright_barrel_height = stage1.sprites["upright_barrel"].get_size()
   stage1.create_stacked_barrels(0, beam_y-upright_barrel_height)
   
+  # Create ladder right in front of Mario
+  ladder_x = beam_width * 4  # Adjust this for the correct position
+  ladder_y = SCREEN_HEIGHT - 100      # Adjust this based on your layout
+  stage1.create_ladder(ladder_x, ladder_y)
+
   stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
 
   return [stage1]

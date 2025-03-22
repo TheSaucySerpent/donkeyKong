@@ -2,6 +2,7 @@ import pygame
 from sprite import SpriteSheet
 from Box2D import b2_dynamicBody, b2PolygonShape
 from conversions import *
+from game_defines import MARIO_CATEGORY_BITS, GROUND_CATEGORY_BITS, LADDER_CATEGORY_BITS
 
 # Constants for Mario
 SPRITE_COORDS = {
@@ -47,12 +48,15 @@ class Mario:
             position=(box2d_x, box2d_y),
             type=b2_dynamicBody,
         )
-        self.body.CreateFixture(
+        self.fixture = self.body.CreateFixture(
             shape=b2PolygonShape(box=(self.width/2/PPM, self.height/2/PPM)),
             density=1.0,
             friction=0.0,
             restitution=0.0,
         )
+
+        self.fixture.categoryBits = MARIO_CATEGORY_BITS
+        self.fixture.maskBits = GROUND_CATEGORY_BITS | LADDER_CATEGORY_BITS
     
     def is_on_ground(self):
         for contact_edge in self.body.contacts:
@@ -66,6 +70,22 @@ class Mario:
 
                 # Ensure the object isn't another dynamic body (like a barrel)
                 if other_body.type != b2_dynamicBody:
+                    return True
+        return False
+    
+    def is_on_ladder(self):
+        # Iterate over all contacts on Mario's body and check for ladder contact
+        for contact_edge in self.body.contacts:
+            contact = contact_edge.contact
+            if contact.touching:
+                # Identify the other fixture in the collision
+                if contact.fixtureA.body == self.body:
+                    other_fixture = contact.fixtureB
+                else:
+                    other_fixture = contact.fixtureA
+
+                # Check if the other fixture belongs to the ladder
+                if other_fixture.filterData.categoryBits == LADDER_CATEGORY_BITS:
                     return True
         return False
 
@@ -113,8 +133,11 @@ class Mario:
         # print("Grounded:", self.is_grounded)
         # print("Velocity:", self.body.linearVelocity)
 
-        self.update_animation()
+        # will later want to add handling for climbing
+        if self.is_on_ladder():
+            print("On ladder!")
 
+        self.update_animation()
 
     def draw(self, screen):
         # Convert Box2D coordinates back to screen coordinates
