@@ -14,7 +14,8 @@ SPRITE_COORDS = {
 MOVE_SPEED = 5
 
 class Mario:
-    def __init__(self, x, y, world):
+    def __init__(self, x, y, world, game_state):
+        self.game_state = game_state
         self.spritesheet = SpriteSheet("assets/sprite_sheet.png")  # load the spritesheet
 
         # load Mario's sprites
@@ -123,6 +124,7 @@ class Mario:
             self.body.linearVelocity = (MOVE_SPEED / PPM, velocity.y)
             self.is_facing_right = True
             self.is_walking = True
+            self.game_state.lose_life()
         else:
             self.body.linearVelocity = (0, velocity.y)
 

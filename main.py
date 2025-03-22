@@ -2,6 +2,8 @@ import pygame
 import sys
 from game_defines import SCREEN_WIDTH, SCREEN_HEIGHT
 from stage import create_stages
+from game_state import GameState
+from characters.mario import Mario
 
 FPS = 60
 
@@ -12,7 +14,14 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Donkey Kong Arcade")
 
-stage1 = create_stages()[0]
+def new_game():
+  stage1 = create_stages()[0]
+  game_state = GameState() # initialze game state
+  mario = Mario(120, SCREEN_HEIGHT - 100, stage1.world, game_state) # create Mario
+  return stage1, game_state, mario
+
+
+stage1, game_state, mario = new_game()
 
 clock = pygame.time.Clock() # clock to track time
 running = True # variable to control the game loop
@@ -24,18 +33,23 @@ while running:
     # handle quit event
     if event.type == pygame.QUIT:
       running = False
+    if event.type == pygame.KEYDOWN:
+      # When game is over and space is pressed, restart the game.
+      if game_state.game_over and event.key == pygame.K_SPACE:
+          stage1, game_state, mario = new_game()
   
   keys = pygame.key.get_pressed() # get the pressed keys
 
-  stage1.mario.handle_movement(keys) # handle Mario's movement
-
-  # update the physics world
-  stage1.world.Step(dt * 50, 6, 2)
-  stage1.world.ClearForces()
+  # Update game logic only if the game isn't over.
+  if not game_state.game_over:
+    mario.handle_movement(keys)
+    stage1.world.Step(dt * 50, 6, 2)
+    stage1.world.ClearForces()
 
   screen.fill((0, 0, 0))    # fill the screen (black background)
   stage1.draw(screen)       # draw stage
-  stage1.mario.draw(screen) # draw Mario
+  game_state.draw(screen)   # draw game state
+  mario.draw(screen) # draw Mario
   pygame.display.update()   # update the display
 
 # gracefully quit pygame and exit program

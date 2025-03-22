@@ -34,14 +34,9 @@ class Stage:
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, 0), (0, SCREEN_HEIGHT)]))
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
-
-    self.mario = None
   
   def get_world(self):
     return self.world
-
-  def get_mario(self):
-    return self.Mario
 
   def load_sprites(self):
     """load all of the sprites needed for stages"""
@@ -134,7 +129,6 @@ class Stage:
     for element in self.elements:
       sprite = self.sprites[element["sprite"]]
       screen.blit(sprite, element["pos"])
-    self.mario.draw(screen)
 
 def create_stages():
   stage1 = Stage()
@@ -209,7 +203,5 @@ def create_stages():
 
   # create Pauline platform
   stage1.create_pauline_platform(beam_width*5, 70)
-
-  stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
 
   return [stage1]
