@@ -10,7 +10,7 @@ SPRITE_COORDS = {
     "walk2": (36, 1),
     "jump":  (55, 1),
 }
-MOVE_SPEED = 4
+MOVE_SPEED = 10
 
 class Mario:
     def __init__(self, x, y, world):

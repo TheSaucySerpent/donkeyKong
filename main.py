@@ -13,8 +13,11 @@ pygame.display.set_caption("Donkey Kong Arcade")
 # create stage and characters (initially only 1 stage, will add more later)
 stage, characters, world = create_stage1()
 
+clock = pygame.time.Clock() # clock to track time
 running = True # variable to control the game loop
 while running:
+  dt = clock.tick(FPS) / 1000.0
+
   # get pygame events
   for event in pygame.event.get():
     # handle quit event
@@ -26,7 +29,7 @@ while running:
   characters["mario"].handle_movement(keys) # handle Mario's movement
 
   # update the physics world
-  world.Step(1.0 / 50.0, 6, 2)
+  world.Step(dt * 50, 6, 2)
   world.ClearForces()
 
   screen.fill((0, 0, 0)) # fill the screen (black background)
@@ -37,7 +40,6 @@ while running:
     character.draw(screen)
 
   pygame.display.update() # update the display
-  pygame.time.Clock().tick(FPS) # limit the frame rate to 60 FPS
 
 # gracefully quit pygame and exit program
 pygame.quit()
