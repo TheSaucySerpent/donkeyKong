@@ -1,7 +1,10 @@
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FPS = 60
+SCREEN_WIDTH = 768
+SCREEN_HEIGHT = 700
+FPS = 60000
 PPM = 32
 
 def box2d_to_sdl(x, y):
     return int(x), SCREEN_HEIGHT - int(y)
+
+def pixels_to_meters(pixels):
+    return pixels / PPM

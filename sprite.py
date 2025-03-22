@@ -1,6 +1,6 @@
 import pygame
 
-SPRITE_SCALE = (64, 64)  # (width, height) after scaling
+SPRITE_SCALE = (48, 48)  # (width, height) after scaling
 SPRITE_WIDTH = 16        # original sprite width in the spritesheet
 SPRITE_HEIGHT = 16       # original sprite height in the spritesheet
 

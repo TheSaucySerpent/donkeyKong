@@ -8,7 +8,7 @@ pygame.init()
 
 # create the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Donkey Kong")
+pygame.display.set_caption("Donkey Kong Arcade")
 
 # create stage and characters (initially only 1 stage, will add more later)
 stage, characters, world = create_stage1()

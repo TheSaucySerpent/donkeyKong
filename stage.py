@@ -7,6 +7,7 @@ SPRITE_COORDS = {
     "beam": (109, 215, 16, 7),
     "ladder": (40, 211, 10, 16),
     "oil_barrel": (145, 193, 16, 16),
+    "upright_barrel": (112, 229, 10, 16)
 }
 
 class Stage:
@@ -22,7 +23,7 @@ class Stage:
       loaded_sprites[name] = sprite
     return loaded_sprites
   
-  def add_element(self, sprite_key, pos, scale=(64, 64)):
+  def add_element(self, sprite_key, pos, scale=(48, 48)):
     self.elements.append({"sprite": sprite_key, "pos": pos, "scale": scale})
   
   def draw(self, screen):
@@ -33,5 +34,10 @@ class Stage:
       sprite = self.sprites[sprite_key]
       sprite = pygame.transform.scale(sprite, scale)
 
-      pos = box2d_to_sdl(self.body.position.x, self.body.position.y)
-      screen.blit(sprite, pos)
+      # Use the position from the element
+      # Convert the position to SDL coordinates
+      sdl_pos = box2d_to_sdl(pos[0], pos[1])
+      
+      # Center the sprite at the position
+      rect = sprite.get_rect(center=sdl_pos)
+      screen.blit(sprite, rect.topleft)
