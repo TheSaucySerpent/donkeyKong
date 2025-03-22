@@ -7,8 +7,16 @@ from characters.mario import Mario
 
 FPS = 60
 
-# initialize pygame
+# initialize pygame & pygame mixer
+pygame.mixer.pre_init(44100, -16, 2, 8192)
 pygame.init()
+
+# load the music file
+pygame.mixer.music.load("assets/level_music.wav")
+pygame.mixer.music.set_volume(0.5) # set the volume
+
+# play the music infinitely
+pygame.mixer.music.play(-1)
 
 # create the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
