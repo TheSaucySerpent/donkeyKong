@@ -36,12 +36,6 @@ while running:
   screen.fill((0, 0, 0))    # fill the screen (black background)
   stage1.draw(screen)       # draw stage
   stage1.mario.draw(screen) # draw Mario
-  stage1.paulene.draw(screen) # draw Paulene
-  stage1.donkey_kong.draw(screen) # draw Donkey Kong
-
-  stage1.item_sprites.update(stage1.mario.return_rect())
-  stage1.item_sprites.draw(screen)
-  
   pygame.display.update()   # update the display
 
 # gracefully quit pygame and exit program

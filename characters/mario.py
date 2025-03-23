@@ -2,7 +2,7 @@ import pygame
 from sprite import SpriteSheet
 from Box2D import b2_dynamicBody, b2PolygonShape
 from conversions import *
-from game_defines import MARIO_CATEGORY_BITS, GROUND_CATEGORY_BITS, LADDER_CATEGORY_BITS
+from game_defines import *
 
 # Constants for Mario
 SPRITE_COORDS = {
@@ -19,7 +19,8 @@ SPRITE_COORDS = {
 MOVE_SPEED = 5
 
 class Mario:
-    def __init__(self, x, y, world):
+    def __init__(self, x, y, world, game_state):
+        self.game_state = game_state
         self.spritesheet = SpriteSheet("assets/sprite_sheet.png")  # load the spritesheet
 
         # load Mario's sprites
@@ -112,6 +113,21 @@ class Mario:
                 if other_fixture.filterData.categoryBits == LADDER_CATEGORY_BITS:
                     return True
         return False
+    
+    def is_on_pauline_platform(self):
+        for contact_edge in self.body.contacts:
+            contact = contact_edge.contact
+            if contact.touching:
+                # Determine the other body in contact
+                if contact.fixtureA.body == self.body:
+                    other_fixture = contact.fixtureB
+                else:
+                    other_fixture = contact.fixtureA
+
+                # Check if the other fixture belongs to Pauline's platform
+                if other_fixture.filterData.categoryBits == PAULINE_PLATFORM_CATEGORY_BITS:
+                    return True
+        return False
 
     def update_animation(self):
         # default to idle
@@ -130,7 +146,7 @@ class Mario:
         if self.is_jumping:
             self.image = self.mario_jump if self.is_facing_right else self.mario_jump_flipped
 
-        if self.climbing:
+        if self.is_climbing:
             pass
         if self.is_pulling_up:
             pass
@@ -187,6 +203,9 @@ class Mario:
         # will later want to add handling for climbing
         if self.is_on_ladder():
             print("On ladder!")
+        if self.is_on_pauline_platform():
+            print("On Pauline's platform!")
+            self.game_state.level_complete = True
 
         self.update_animation()
 

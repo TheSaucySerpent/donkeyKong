@@ -37,14 +37,9 @@ class Stage:
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, 0), (0, SCREEN_HEIGHT)]))
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
-
-    self.mario = None
   
   def get_world(self):
     return self.world
-
-  def get_mario(self):
-    return self.Mario
 
   def load_sprites(self):
     """load all of the sprites needed for stages"""
@@ -57,19 +52,27 @@ class Stage:
   def add_element(self, sprite_key, pos):
     self.elements.append({"sprite": sprite_key, "pos": pos})
   
-  def add_static_object(self, key, x, y):
+  def add_static_object(self, key, x, y, category_bits=GROUND_CATEGORY_BITS):
     dimensions = self.sprites[key].get_size()
 
     box2d_x = x/PPM
     box2d_y = (SCREEN_HEIGHT-y)/ PPM
 
-    self.world.CreateStaticBody(
+    body = self.world.CreateStaticBody(
       position=(box2d_x, box2d_y),
       shapes=b2PolygonShape(box=(dimensions[0]/2/PPM, dimensions[1]/2/PPM))
     )
+
+    # apply collision filtering
+    fixture = body.fixtures[0]
+    filterdata = fixture.filterData
+    filterdata.categoryBits = category_bits
+    filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
+    fixture.filterData = filterdata
+
     self.add_element(key, (x, y))
 
-  def create_beam_row(self, start_x, start_y, num_beams, slope_direction=SlopeDirection.NO_SLOPE):
+  def create_beam_row(self, start_x, start_y, num_beams, slope_direction=SlopeDirection.NO_SLOPE, category_bits=GROUND_CATEGORY_BITS):
     beam_width, beam_height = self.sprites["beam"].get_size()
     for i in range(num_beams):
       beam_x = start_x + i * beam_width
@@ -82,7 +85,7 @@ class Stage:
       else:
           beam_y = start_y  # No slope
       
-      self.add_static_object("beam", beam_x, beam_y)
+      self.add_static_object("beam", beam_x, beam_y, category_bits)
 
     # return the x and y of the last beam created
     return beam_x, beam_y
@@ -118,7 +121,8 @@ class Stage:
 
   def create_pauline_platform(self, x, y):
     beam_width, _ = self.sprites["beam"].get_size()
-    beam_x, beam_y = self.create_beam_row(x, y, 3, SlopeDirection.NO_SLOPE)
+    beam_x, beam_y = self.create_beam_row(x, y, 3, SlopeDirection.NO_SLOPE, PAULINE_PLATFORM_CATEGORY_BITS)
+    
     ladder_x = beam_x + beam_width
     ladder_y = beam_y + self.sprites["ladder"].get_size()[1] / 2
     self.create_ladder(ladder_x, ladder_y, double_ladder=True)
@@ -137,7 +141,6 @@ class Stage:
     for element in self.elements:
       sprite = self.sprites[element["sprite"]]
       screen.blit(sprite, element["pos"])
-    self.mario.draw(screen)
 
 def create_stages():
   stage1 = Stage()
@@ -213,12 +216,13 @@ def create_stages():
   # create Pauline platform
   stage1.create_pauline_platform(beam_width*5, 70)
 
-  stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
   stage1.paulene = Paulene((250,23))
   stage1.donkey_kong = Donkey_Kong((90,30))
-
   stage1.item_sprites = pygame.sprite.Group()
   hammer = Hammer((300,600))
   stage1.item_sprites.add(hammer)
 
-  return [stage1]
+  
+  stage2 = Stage()
+
+  return [stage1, stage2]
