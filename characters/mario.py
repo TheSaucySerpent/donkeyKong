@@ -15,6 +15,7 @@ SPRITE_COORDS = {
     "death3": (36,37),
     "death4": (54,37),
     "death5": (72,37),
+    "ladderclimb": (91,1),
 }
 MOVE_SPEED = 5
 
@@ -36,6 +37,8 @@ class Mario:
         self.mario_death_4,self.mario_death_4_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death4"])
         self.mario_death_5,self.mario_death_5_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death5"])
 
+        self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
+
         # create a list of frames for animations
         self.mario_walk_animation = [self.mario_walk_1, self.mario_walk_2]
         self.mario_walk_animation_flipped = [self.mario_walk_1_flipped, self.mario_walk_2_flipped]
@@ -45,6 +48,7 @@ class Mario:
         self.mario_death_animation_flipped = [self.mario_death_1_flipped,self.mario_death_2_flipped,
                                               self.mario_death_3_flipped,self.mario_death_4_flipped,
                                               self.mario_death_5_flipped]
+        self.mario_climb_animation = [self.mario_ladder_climb, self.mario_ladder_climb_flipped]
 
         # default image is the idle sprite
         self.image = self.mario_idle
@@ -59,11 +63,13 @@ class Mario:
         self.is_jumping = False
         self.is_climbing = False
         self.is_pulling_up = False
+        self.is_moving_on_ladder = False
         self.is_dead = False
         self.is_grounded = False
         self.move_index = 0
         self.current_walk_frame = 0
         self.current_death_frame = 0
+        self.current_climb_frame = 0
         self.lock_direction = False
 
         # for testing
@@ -155,7 +161,12 @@ class Mario:
             self.image = self.mario_jump if self.is_facing_right else self.mario_jump_flipped
 
         if self.is_climbing:
-            pass
+            if self.is_moving_on_ladder:
+                self.current_climb_frame += 1
+            
+            current_climb_frame = int(self.current_climb_frame/ 7) % 2
+            self.image = self.mario_climb_animation[current_climb_frame]
+
         if self.is_pulling_up:
             pass
 
@@ -216,15 +227,21 @@ class Mario:
 
             if keys[pygame.K_UP]:
                 self.body.linearVelocity = (velocity.x, MOVE_SPEED / PPM)  # Move up
+                self.is_climbing = True
+                self.is_moving_on_ladder = True
             elif keys[pygame.K_DOWN]:
                 self.body.linearVelocity = (velocity.x, -MOVE_SPEED / PPM)  # Move down
+                self.is_climbing = True
+                self.is_moving_on_ladder = True
             else:
                 self.body.linearVelocity = (velocity.x, 0)  # Stop vertical movement
+                self.is_moving_on_ladder = False
             
             self.just_climbed = True  # Set the flag when Mario is climbing
             self.climb_cooldown = 10  # Set cooldown (frames)
 
         else:
+            self.is_climbing = False
             self.body.gravityScale = 1  # Restore gravity
             self.fixture.sensor = False  # Re-enable physical collision
 
