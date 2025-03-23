@@ -46,9 +46,6 @@ class Stage:
       loaded_sprites[name] = sprite
     return loaded_sprites
   
-  def add_element(self, sprite_key, pos):
-    self.elements.append({"sprite": sprite_key, "pos": pos})
-  
   def add_static_object(self, key, x, y, category_bits=GROUND_CATEGORY_BITS):
     dimensions = self.sprites[key].get_size()
 
@@ -67,7 +64,8 @@ class Stage:
     filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
     fixture.filterData = filterdata
 
-    self.add_element(key, (x, y))
+    # Store both the sprite key and the Box2D body for drawing
+    self.elements.append({"sprite": key, "body": body})
 
   def create_beam_row(self, start_x, start_y, num_beams, slope_direction=SlopeDirection.NO_SLOPE, category_bits=GROUND_CATEGORY_BITS):
     beam_width, beam_height = self.sprites["beam"].get_size()
@@ -107,7 +105,7 @@ class Stage:
         filterdata.maskBits = MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS
         ladder_fixture.filterData = filterdata
 
-        self.add_element("ladder", (x_pos, y_pos))
+        self.elements.append({"sprite": "ladder", "body": ladder_body})
 
     # Create the first ladder
     add_ladder(x, y)
@@ -134,10 +132,14 @@ class Stage:
         self.add_static_object("upright_barrel", barrel_x, barrel_y)
   
   def draw(self, screen):
-    """draw the stage and all of its elements"""
+    """Draw the stage elements based on their hitboxes."""
     for element in self.elements:
-      sprite = self.sprites[element["sprite"]]
-      screen.blit(sprite, element["pos"])
+        sprite = self.sprites[element["sprite"]]
+        # Convert the body's position (center) from Box2D to screen coordinates
+        pos = box2d_to_pygame((element["body"].position.x, element["body"].position.y))
+        rect = sprite.get_rect(center=pos)
+        screen.blit(sprite, rect.topleft)
+
 
 def create_stages():
   stage1 = Stage()
@@ -151,7 +153,7 @@ def create_stages():
   # first row of beams, half flat, half slope up
   beam_x, _ = stage1.create_beam_row(beam_x, beam_y, 8, SlopeDirection.NO_SLOPE)
   stage1.create_beam_row(beam_x+beam_width, beam_y, 8, SlopeDirection.SLOPE_UP)
-  stage1.add_static_object("oil_barrel", beam_width, beam_y - oil_barrel_height)
+  stage1.add_static_object("oil_barrel", beam_width, beam_y - beam_height/2 - oil_barrel_height/2)
 
   # create slanted beams (alternating slope directions)
   vertical_spacing = 100
@@ -176,27 +178,27 @@ def create_stages():
   stage1.create_beam_row(beam_x+beam_width, beam_y, 5, SlopeDirection.SLOPE_DOWN)
 
   # create upright barrels next to Donkey Kong
-  _, upright_barrel_height = stage1.sprites["upright_barrel"].get_size()
-  stage1.create_stacked_barrels(0, beam_y-upright_barrel_height)
+  oil_barrel_width, upright_barrel_height = stage1.sprites["upright_barrel"].get_size()
+  stage1.create_stacked_barrels(oil_barrel_width, beam_y - beam_height/2 - upright_barrel_height/2)
   
   # create ladders
 
   # first floor ladders
   ladder_x = beam_width * 13
-  ladder_y = SCREEN_HEIGHT - 100
+  ladder_y = SCREEN_HEIGHT - 90
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
   
   # second floor ladders
   ladder_x = beam_width * 3
-  ladder_y -= 115
+  ladder_y -= 110
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
   ladder_x = beam_width * 8
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
 
   # third floor ladders
-  ladder_X = beam_width * 9
+  ladder_x = beam_width * 9
   ladder_y -= 100
-  stage1.create_ladder(ladder_X, ladder_y, double_ladder=True)
+  stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
   ladder_x = beam_width * 13
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
 
