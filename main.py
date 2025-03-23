@@ -76,10 +76,13 @@ while running:
       mario = Mario(SCREEN_WIDTH / 2 - 50, 0, current_stage.world, game_state)
 
   screen.fill((0, 0, 0))     # fill the screen (black background)
+  current_stage.update_items(mario.return_rect())
+
   current_stage.draw(screen) # draw stage
   game_state.draw(screen)    # draw game state
   mario.draw(screen)         # draw Mario
   pygame.display.update()    # update the display
+
 
 # gracefully quit pygame and exit program
 pygame.quit()

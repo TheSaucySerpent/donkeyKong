@@ -20,7 +20,21 @@ class Hammer(pygame.sprite.Sprite):
             self.on_collision()
 
     def on_collision(self):
-        pass
+
+        sound1 = pygame.mixer.Sound('assets/Bonus_sfx.wav')
+        sound1.set_volume(0.1)
+        sound1.play()
+
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load("assets/Hammer_music.wav")
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(start=3.8)
+
+        pygame.mixer.music.queue("assets/level_music.wav")
+        pygame.mixer.music.set_volume(0.5)
+
+        self.kill()
+        
 
 
     def draw(self,screen):
