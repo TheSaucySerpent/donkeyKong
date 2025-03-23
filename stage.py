@@ -4,6 +4,9 @@ from conversions import *
 from Box2D import b2World, b2PolygonShape, b2EdgeShape
 from game_defines import *
 from characters.mario import Mario
+from characters.paulene import Paulene
+from characters.donkey_kong import Donkey_Kong
+from items.hammer import Hammer
 from enum import Enum
 
 # the location of each sprite in the sprite sheet,
@@ -211,5 +214,11 @@ def create_stages():
   stage1.create_pauline_platform(beam_width*5, 70)
 
   stage1.mario = Mario(beam_width * 3, SCREEN_HEIGHT - 100, stage1.world)
+  stage1.paulene = Paulene((250,23))
+  stage1.donkey_kong = Donkey_Kong((90,30))
+
+  stage1.item_sprites = pygame.sprite.Group()
+  hammer = Hammer((300,600))
+  stage1.item_sprites.add(hammer)
 
   return [stage1]
