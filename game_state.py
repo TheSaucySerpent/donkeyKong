@@ -6,6 +6,7 @@ class GameState:
         self.lives = 3
         self.level = 1
         self.game_over = False
+        self.level_complete = False
     
     def add_score(self, points):
         self.score += points
