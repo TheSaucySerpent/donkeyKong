@@ -65,6 +65,10 @@ class Mario:
         self.current_walk_frame = 0
         self.current_death_frame = 0
 
+        # for testing
+        self.just_climbed = False
+        self.climb_cooldown = 0
+
         box2d_x = x/PPM
         box2d_y = (SCREEN_HEIGHT-y)/ PPM
 
@@ -190,7 +194,31 @@ class Mario:
         else:
             self.body.linearVelocity = (0, velocity.y)
 
-        if keys[pygame.K_UP] and self.is_grounded:  # Jump only if on ground
+        if self.is_on_ladder():
+            self.body.gravityScale = 0  # Disable gravity while climbing
+            self.fixture.sensor = True  # Disable physical collision
+
+            if keys[pygame.K_UP]:
+                self.body.linearVelocity = (velocity.x, MOVE_SPEED / PPM)  # Move up
+            elif keys[pygame.K_DOWN]:
+                self.body.linearVelocity = (velocity.x, -MOVE_SPEED / PPM)  # Move down
+            else:
+                self.body.linearVelocity = (velocity.x, 0)  # Stop vertical movement
+            
+            self.just_climbed = True  # Set the flag when Mario is climbing
+            self.climb_cooldown = 10  # Set cooldown (frames)
+
+        else:
+            self.body.gravityScale = 1  # Restore gravity
+            self.fixture.sensor = False  # Re-enable physical collision
+
+            if self.climb_cooldown > 0:
+                self.climb_cooldown -= 1  # Countdown the cooldown timer
+            else:
+                self.just_climbed = False  # Reset flag after cooldown
+
+        # Prevent instant jump if just climbed
+        if keys[pygame.K_UP] and self.is_grounded and not self.just_climbed:
             self.body.ApplyLinearImpulse((0, 15 * self.body.mass), self.body.worldCenter, True)
             self.is_jumping = True
 
