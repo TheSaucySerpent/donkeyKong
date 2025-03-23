@@ -194,7 +194,8 @@ class Mario:
             self.body.ApplyLinearImpulse((0, 15 * self.body.mass), self.body.worldCenter, True)
             self.is_jumping = True
 
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_DOWN] and not self.is_dead:
+            self.game_state.lose_life()
             self.is_dead = True
         
         # print("Grounded:", self.is_grounded)
