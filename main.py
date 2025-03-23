@@ -23,18 +23,15 @@ pygame.mixer.music.play(-1)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Donkey Kong Arcade")
 
-def new_game(stage_index):
+def new_game():
   stages = create_stages()
-  if stage_index < len(stages):
-    stage = stages[stage_index]
-    game_state = GameState()  # initialize game state
-    mario = Mario(SCREEN_WIDTH / 2 - 50, 0, stage.world, game_state)  # create Mario
-    return game_state, mario, stages, stage
-  else:
-    return None, None, None, None
+  current_stage = stages[0]
+  game_state = GameState()  # initialize game state
+  mario = Mario(SCREEN_WIDTH / 2 - 50, 0, current_stage.world, game_state)  # create Mario
+  return game_state, mario, stages, current_stage
 
 current_stage_index = 0
-game_state, mario, stages, current_stage = new_game(current_stage_index)
+game_state, mario, stages, current_stage = new_game()
 
 clock = pygame.time.Clock() # clock to track time
 running = True # variable to control the game loop
@@ -50,7 +47,7 @@ while running:
       # When game is over and space is pressed, restart the game.
       if game_state.game_over and event.key == pygame.K_SPACE:
           current_stage_index = 0
-          game_state, mario, stages, current_stage = new_game(current_stage_index)
+          game_state, mario, stages, current_stage = new_game()
   
   keys = pygame.key.get_pressed() # get the pressed keys
 
@@ -74,7 +71,9 @@ while running:
           # If the last stage is complete, reset to the first stage
           print("Congratulations! You've completed all levels! Restarting...")
           current_stage_index = 0
-      game_state, mario, stages, current_stage = new_game(current_stage_index)
+      current_stage = stages[current_stage_index]
+      # Create a new Mario with the new stage's world.
+      mario = Mario(SCREEN_WIDTH / 2 - 50, 0, current_stage.world, game_state)
 
   screen.fill((0, 0, 0))    # fill the screen (black background)
   current_stage.draw(screen)       # draw stage
