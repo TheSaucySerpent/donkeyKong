@@ -17,6 +17,7 @@ class Donkey_Kong:
         self.position = position
         self.barrel_position = (position[0] + 34,position[1] + 60)
         self.image = self.dk_idle
+        self.freeze = False
 
 
         # Index to figure out when to switch animations
@@ -44,7 +45,8 @@ class Donkey_Kong:
              
 
     def draw(self,screen):
-        self.animate()
+        if not self.freeze:
+            self.animate()
         screen.blit(self.image, self.position)
         if self.throw_animation_index == 2:
             screen.blit(self.dk_barrel,self.barrel_position)

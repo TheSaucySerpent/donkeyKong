@@ -31,6 +31,10 @@ class Stage:
     self.sprites = self.load_sprites()                         # load the individual sprites
     self.elements = []                                         # the elements of the stage
 
+    self.donkey_kong = Donkey_Kong((90,30))
+    self.paulene = Paulene((250,23))
+    self.item_sprites = pygame.sprite.Group()
+
     self.world = b2World(gravity=(0, -10), doSleep=False)      # create the physics world
     # create world boundaries
     self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, 0), (SCREEN_WIDTH, 0)]))
@@ -141,6 +145,12 @@ class Stage:
     for element in self.elements:
       sprite = self.sprites[element["sprite"]]
       screen.blit(sprite, element["pos"])
+    self.paulene.draw(screen)
+    self.donkey_kong.draw(screen)
+
+  def update_items(self):
+    self.item_sprites.update()
+
 
 def create_stages():
   stage1 = Stage()
@@ -216,13 +226,11 @@ def create_stages():
   # create Pauline platform
   stage1.create_pauline_platform(beam_width*5, 70)
 
-  stage1.paulene = Paulene((250,23))
-  stage1.donkey_kong = Donkey_Kong((90,30))
-  stage1.item_sprites = pygame.sprite.Group()
+
   hammer = Hammer((300,600))
   stage1.item_sprites.add(hammer)
 
-  
+
   stage2 = Stage()
 
   return [stage1, stage2]
