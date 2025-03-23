@@ -19,13 +19,13 @@ class GameState:
     
     def next_level(self):
       self.level += 1
+      self.level_complete = False
 
     def draw(self, screen):
       font = pygame.font.Font(None, 36)
       score_text = font.render(f"Score: {self.score}", True, (255, 255, 255))
       lives_text = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
       level_text = font.render(f"Level: {self.level}", True, (255, 255, 255))
-
 
       margin = 10
       # create rects with top right alignment

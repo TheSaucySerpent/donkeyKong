@@ -67,15 +67,14 @@ while running:
             level_complete_time = pygame.time.get_ticks() / 1000.0  # Get the current time
 
     # If the level is complete, check if the delay has passed
-    if game_state.level_complete:
-      if (pygame.time.get_ticks() / 1000.0 - level_complete_time) >= LEVEL_COMPLETE_DELAY:
-        level_complete = False  # Reset the flag for the next level
-        current_stage_index += 1  # Move to the next stage
-        if current_stage_index >= len(stages):
-            # If the last stage is complete, reset to the first stage
-            print("Congratulations! You've completed all levels! Restarting...")
-            current_stage_index = 0
-        game_state, mario, stages, current_stage = new_game(current_stage_index)
+    if game_state.level_complete and (pygame.time.get_ticks() / 1000.0 - level_complete_time) >= LEVEL_COMPLETE_DELAY:
+      game_state.next_level()
+      current_stage_index += 1  # Move to the next stage
+      if current_stage_index >= len(stages):
+          # If the last stage is complete, reset to the first stage
+          print("Congratulations! You've completed all levels! Restarting...")
+          current_stage_index = 0
+      game_state, mario, stages, current_stage = new_game(current_stage_index)
 
   screen.fill((0, 0, 0))    # fill the screen (black background)
   current_stage.draw(screen)       # draw stage
