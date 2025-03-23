@@ -151,8 +151,8 @@ class Stage:
     self.donkey_kong.draw(screen)
     self.item_sprites.draw(screen)
 
-  def update_items(self,mario_rect):
-    self.item_sprites.update(mario_rect)
+  def update_items(self,Mario,game_state):
+    self.item_sprites.update(Mario,game_state)
 
 
 def create_stages():

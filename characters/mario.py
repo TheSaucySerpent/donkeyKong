@@ -66,6 +66,7 @@ class Mario:
         self.is_moving_on_ladder = False
         self.is_dead = False
         self.is_grounded = False
+        self.has_hammer = False
         self.move_index = 0
         self.current_walk_frame = 0
         self.current_death_frame = 0
@@ -172,17 +173,28 @@ class Mario:
 
         if self.is_dead:
             self.body.linearVelocity = (0,0)
-            frame_duration = 30
+            frame_duration = 45
             self.lock_direction = True
+            if self.current_death_frame == 0:
+                pygame.mixer.music.unload()
+                death_sound = pygame.mixer.Sound('assets/death.wav')
+                death_sound.set_volume(0.1)
+                death_sound.play()
+
             self.current_death_frame += 1
             if self.current_death_frame > (frame_duration * 6) - 1:
                 self.current_death_frame = 0
                 self.is_dead = False
 
                 # Sets Mario back to the start
-                self.body.position = self.mario_start_pos_box2d
                 self.lock_direction = False
                 self.is_facing_right = True
+                self.body.position = self.mario_start_pos_box2d
+
+                pygame.mixer.music.load("assets/level_music.wav")
+                pygame.mixer.music.set_volume(0.5) # set the volume
+                pygame.mixer.music.play(-1)
+
 
 
             elif self.current_death_frame > frame_duration * 3:
@@ -190,6 +202,8 @@ class Mario:
                                 if self.is_facing_right
                                 else self.mario_death_animation_flipped[4]
                         )
+            elif self.current_death_frame < frame_duration * 2 - 20:
+                pass
             else:
                 current_frame = int(self.current_death_frame/ 5) % 3
                 self.image = (self.mario_death_animation[int(current_frame)]
@@ -288,3 +302,7 @@ class Mario:
     def return_rect(self):
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
         return self.image.get_rect(center=pos)
+    
+    def activate_mario_hammer_time(self):
+        self.has_hammer = True
+        print(True)
