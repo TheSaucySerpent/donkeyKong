@@ -26,13 +26,13 @@ class SlopeDirection(Enum):
   SLOPE_DOWN = 2
 
 class Stage:
-  def __init__(self):
+  def __init__(self,donkey_kong_pos, paulene_pos):
     self.spritesheet = SpriteSheet("assets/sprite_sheet.png")  # load the spritesheet
     self.sprites = self.load_sprites()                         # load the individual sprites
     self.elements = []                                         # the elements of the stage
 
-    self.donkey_kong = Donkey_Kong((90,30))
-    self.paulene = Paulene((250,23))
+    self.donkey_kong = Donkey_Kong(donkey_kong_pos)
+    self.paulene = Paulene(paulene_pos)
     self.item_sprites = pygame.sprite.Group()
 
     self.world = b2World(gravity=(0, -10), doSleep=False)      # create the physics world
@@ -149,13 +149,14 @@ class Stage:
 
     self.paulene.draw(screen)
     self.donkey_kong.draw(screen)
+    self.item_sprites.draw(screen)
 
   def update_items(self):
     self.item_sprites.update()
 
 
 def create_stages():
-  stage1 = Stage()
+  stage1 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15))
 
   beam_width, beam_height = stage1.sprites["beam"].get_size()
   oil_barrel_width, oil_barrel_height = stage1.sprites["oil_barrel"].get_size()
@@ -228,11 +229,9 @@ def create_stages():
   # create Pauline platform
   stage1.create_pauline_platform(beam_width*5, 70)
 
-
-  hammer = Hammer((300,600))
-  stage1.item_sprites.add(hammer)
+  stage1.item_sprites.add(Hammer((300,600)))
 
 
-  stage2 = Stage()
+  stage2 = Stage((0,0),(0,0))
 
   return [stage1, stage2]

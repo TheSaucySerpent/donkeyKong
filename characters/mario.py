@@ -64,6 +64,7 @@ class Mario:
         self.move_index = 0
         self.current_walk_frame = 0
         self.current_death_frame = 0
+        self.lock_direction = False
 
         # for testing
         self.just_climbed = False
@@ -71,6 +72,9 @@ class Mario:
 
         box2d_x = x/PPM
         box2d_y = (SCREEN_HEIGHT-y)/ PPM
+
+        self.mario_start_pos_box2d = (box2d_x,box2d_y)
+        
 
         # create Mario's physics body
         self.body = world.CreateDynamicBody(
@@ -158,10 +162,18 @@ class Mario:
         if self.is_dead:
             self.body.linearVelocity = (0,0)
             frame_duration = 30
+            self.lock_direction = True
             self.current_death_frame += 1
             if self.current_death_frame > (frame_duration * 6) - 1:
                 self.current_death_frame = 0
                 self.is_dead = False
+
+                # Sets Mario back to the start
+                self.body.position = self.mario_start_pos_box2d
+                self.lock_direction = False
+                self.is_facing_right = True
+
+
             elif self.current_death_frame > frame_duration * 3:
                 self.image = (self.mario_death_animation[4]
                                 if self.is_facing_right
@@ -185,12 +197,16 @@ class Mario:
 
         if keys[pygame.K_LEFT]:
             self.body.linearVelocity = (-MOVE_SPEED / PPM, velocity.y)
-            self.is_facing_right = False
             self.is_walking = True
+            if not self.lock_direction:
+                self.is_facing_right = False
+
         elif keys[pygame.K_RIGHT]:
             self.body.linearVelocity = (MOVE_SPEED / PPM, velocity.y)
-            self.is_facing_right = True
             self.is_walking = True
+
+            if not self.lock_direction:
+                self.is_facing_right = True
         else:
             self.body.linearVelocity = (0, velocity.y)
 
@@ -245,8 +261,13 @@ class Mario:
         screen.blit(self.image, rect.topleft)
         # print(f"Mario's position: {pos}")
 
-        
+    
+    def change_mario_start_position(self,x,y):
+        box2d_x = x/PPM
+        box2d_y = (SCREEN_HEIGHT-y)/ PPM
+        self.mario_start_pos_box2d = (box2d_x,box2d_y)
+
 
     def return_rect(self):
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
-        return   self.image.get_rect(center=pos)
+        return self.image.get_rect(center=pos)
