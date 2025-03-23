@@ -27,7 +27,7 @@ def new_game():
   stages = create_stages()
   current_stage = stages[0]
   game_state = GameState()  # initialize game state
-  mario = Mario(SCREEN_WIDTH / 2 - 50, 0, current_stage.world, game_state)  # create Mario
+  mario = Mario(200, SCREEN_HEIGHT-125, current_stage.world, game_state)  # create Mario
   return game_state, mario, stages, current_stage
 
 current_stage_index = 0
