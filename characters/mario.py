@@ -16,6 +16,15 @@ SPRITE_COORDS = {
     "death4": (54,37),
     "death5": (72,37),
     "ladderclimb": (91,1),
+
+    "Hammer_up_idle": (2,19),
+    "Hammer_up_walk1": (37,19),
+    "Hammer_up_walk2": (72,19),
+
+    "Hammer_down_idle": (20,19),
+    "Hammer_down_walk1": (55,19),
+    "Hammer_down_walk2": (90,19),
+
 }
 MOVE_SPEED = 5
 
@@ -30,6 +39,11 @@ class Mario:
         self.mario_walk_2, self.mario_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["walk2"])
         self.mario_jump, self.mario_jump_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["jump"])
 
+        self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
+
+
+
+
         # Death sprites
         self.mario_death_1,self.mario_death_1_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death1"])
         self.mario_death_2,self.mario_death_2_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death2"])
@@ -37,7 +51,23 @@ class Mario:
         self.mario_death_4,self.mario_death_4_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death4"])
         self.mario_death_5,self.mario_death_5_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death5"])
 
-        self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
+        # Mario Hammer version
+        self.mario_hammer_up_idle,self.mario_hammer_up_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_idle"])
+        self.mario_hammer_up_walk_1, self.mario_hammer_up_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_walk1"])
+        self.mario_hammer_up_walk_2, self.mario_hammer_up_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_walk2"])
+
+        self.mario_hammer_down_idle,self.mario_hammer_down_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_idle"])
+        self.mario_hammer_down_walk_1, self.mario_hammer_down_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk1"])
+        self.mario_hammer_down_walk_2, self.mario_hammer_down_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk2"])
+
+
+
+        # Mario Hammer Sprites (The actual hammer object)
+        self.hammer_up, self.hammer_up_flipped = self.spritesheet.load_sprite((3,61),10,10)
+        self.hammer_down, self.hammer_down_flipped = self.spritesheet.load_sprite((18,61),17,9)
+        self.hammer_up_flash, self.hammer_up_flash_flipped  = self.spritesheet.load_sprite((39,61),10,10)
+        self.hammer_down_flash, self.hammer_down_flash_flipped = self.spritesheet.load_sprite((54,61),17,9)
+
 
         # create a list of frames for animations
         self.mario_walk_animation = [self.mario_walk_1, self.mario_walk_2]
@@ -48,7 +78,18 @@ class Mario:
         self.mario_death_animation_flipped = [self.mario_death_1_flipped,self.mario_death_2_flipped,
                                               self.mario_death_3_flipped,self.mario_death_4_flipped,
                                               self.mario_death_5_flipped]
+        
         self.mario_climb_animation = [self.mario_ladder_climb, self.mario_ladder_climb_flipped]
+
+        self.mario_hammer_idle_anim = [self.mario_hammer_up_idle,self.mario_hammer_down_idle]
+        self.mario_hammer_idle_flipped_anim =[self.mario_hammer_up_idle_flipped,self.mario_hammer_down_idle_flipped]
+
+        self.mario_hammer_up_walk_anim = (self.mario_hammer_up_walk_1,self.mario_hammer_up_walk_2)
+        self.mario_hammer_up_walk_anim_flipped = (self.mario_hammer_up_walk_1_flipped,self.mario_hammer_up_walk_2_flipped)
+
+        self.mario_hammer_down_walk_anim = (self.mario_hammer_down_walk_1,self.mario_hammer_down_walk_2)
+        self.mario_hammer_down_walk_anim_flipped = (self.mario_hammer_down_walk_1_flipped,self.mario_hammer_down_walk_2_flipped)
+        
 
         # default image is the idle sprite
         self.image = self.mario_idle
@@ -71,6 +112,7 @@ class Mario:
         self.current_walk_frame = 0
         self.current_death_frame = 0
         self.current_climb_frame = 0
+        self.current_hammer_frame = 0
         self.lock_direction = False
 
         # for testing
@@ -147,8 +189,36 @@ class Mario:
     def update_animation(self):
         # default to idle
         self.image = self.mario_idle if self.is_facing_right else self.mario_idle_flipped
+        if self.has_hammer:
+            self.is_climbing = False
+            self.is_jumping = False
+            self.current_hammer_frame += 1
+            hammer_index = int(self.current_hammer_frame/5) % 2
+            hammer_movement = int(self.current_hammer_frame/10) % 2
+            if self.is_walking:
+                if hammer_movement == 1:
+                    self.image = (self.mario_hammer_up_walk_anim[hammer_index]
+                    if self.is_facing_right
+                    else self.mario_hammer_up_walk_anim_flipped[hammer_index])
+                else:
+                    self.image = (self.mario_hammer_down_walk_anim[hammer_index]
+                                  if self.is_facing_right
+                                  else self.mario_hammer_down_walk_anim_flipped[hammer_index]
+                                  )
+            else:
+                if hammer_movement == 1:
+                    self.image = (self.mario_hammer_idle_anim[0]
+                                if self.is_facing_right 
+                                else self.mario_hammer_idle_flipped_anim[0])
+                else:
+                    self.image = (self.mario_hammer_idle_anim[1]
+                                if self.is_facing_right 
+                                else self.mario_hammer_idle_flipped_anim[1])
 
-        if self.is_walking:
+            if self.current_hammer_frame > 720:
+                self.has_hammer = False
+
+        elif self.is_walking:
             self.current_walk_frame += 1
             if self.current_walk_frame >= 5:
                 self.current_walk_frame = 0
@@ -290,6 +360,23 @@ class Mario:
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
         rect = self.image.get_rect(center=pos)
         screen.blit(self.image, rect.topleft)
+
+        if self.has_hammer:
+            if int(self.current_hammer_frame/10) % 2:
+                if self.is_facing_right:
+                    hammer_pos = (rect.topleft[0] + 5, rect.topleft[1] - 30)
+                    screen.blit(self.hammer_up, hammer_pos)
+                else:
+                    hammer_pos = (rect.topleft[0] + 12, rect.topleft[1] - 30)
+                    screen.blit(self.hammer_up_flipped, hammer_pos)
+                
+            else:
+                if self.is_facing_right:
+                    hammer_pos =(rect.topleft[0] + 40, rect.topleft[1] + 16)
+                    screen.blit(self.hammer_down, hammer_pos)
+                else:
+                    hammer_pos =(rect.topleft[0] - 40, rect.topleft[1] + 16)
+                    screen.blit(self.hammer_down_flipped, hammer_pos)
         # print(f"Mario's position: {pos}")
 
     
@@ -306,3 +393,4 @@ class Mario:
     def activate_mario_hammer_time(self):
         self.has_hammer = True
         print(True)
+
