@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from sprite import SpriteSheet
 from Box2D import b2_dynamicBody, b2PolygonShape
@@ -16,8 +18,18 @@ SPRITE_COORDS = {
     "death4": (54,37),
     "death5": (72,37),
     "ladderclimb": (91,1),
+
+    "Hammer_up_idle": (2,19),
+    "Hammer_up_walk1": (37,19),
+    "Hammer_up_walk2": (72,19),
+
+    "Hammer_down_idle": (20,19),
+    "Hammer_down_walk1": (55,19),
+    "Hammer_down_walk2": (90,19),
+
 }
 MOVE_SPEED = 5
+FALL_THRESHOLD = 8
 
 class Mario:
     def __init__(self, x, y, world, game_state):
@@ -30,6 +42,8 @@ class Mario:
         self.mario_walk_2, self.mario_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["walk2"])
         self.mario_jump, self.mario_jump_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["jump"])
 
+        self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
+
         # Death sprites
         self.mario_death_1,self.mario_death_1_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death1"])
         self.mario_death_2,self.mario_death_2_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death2"])
@@ -37,7 +51,20 @@ class Mario:
         self.mario_death_4,self.mario_death_4_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death4"])
         self.mario_death_5,self.mario_death_5_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death5"])
 
-        self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
+        # Mario Hammer version
+        self.mario_hammer_up_idle,self.mario_hammer_up_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_idle"])
+        self.mario_hammer_up_walk_1, self.mario_hammer_up_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_walk1"])
+        self.mario_hammer_up_walk_2, self.mario_hammer_up_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_up_walk2"])
+
+        self.mario_hammer_down_idle,self.mario_hammer_down_idle_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_idle"])
+        self.mario_hammer_down_walk_1, self.mario_hammer_down_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk1"])
+        self.mario_hammer_down_walk_2, self.mario_hammer_down_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk2"])
+
+        # Mario Hammer Sprites (The actual hammer object)
+        self.hammer_up, self.hammer_up_flipped = self.spritesheet.load_sprite((3,61),10,10)
+        self.hammer_down, self.hammer_down_flipped = self.spritesheet.load_sprite((18,61),17,9)
+        self.hammer_up_flash, self.hammer_up_flash_flipped  = self.spritesheet.load_sprite((39,61),10,10)
+        self.hammer_down_flash, self.hammer_down_flash_flipped = self.spritesheet.load_sprite((54,61),17,9)
 
         # create a list of frames for animations
         self.mario_walk_animation = [self.mario_walk_1, self.mario_walk_2]
@@ -48,7 +75,17 @@ class Mario:
         self.mario_death_animation_flipped = [self.mario_death_1_flipped,self.mario_death_2_flipped,
                                               self.mario_death_3_flipped,self.mario_death_4_flipped,
                                               self.mario_death_5_flipped]
+        
         self.mario_climb_animation = [self.mario_ladder_climb, self.mario_ladder_climb_flipped]
+
+        self.mario_hammer_idle_anim = [self.mario_hammer_up_idle,self.mario_hammer_down_idle]
+        self.mario_hammer_idle_flipped_anim =[self.mario_hammer_up_idle_flipped,self.mario_hammer_down_idle_flipped]
+
+        self.mario_hammer_up_walk_anim = (self.mario_hammer_up_walk_1,self.mario_hammer_up_walk_2)
+        self.mario_hammer_up_walk_anim_flipped = (self.mario_hammer_up_walk_1_flipped,self.mario_hammer_up_walk_2_flipped)
+
+        self.mario_hammer_down_walk_anim = (self.mario_hammer_down_walk_1,self.mario_hammer_down_walk_2)
+        self.mario_hammer_down_walk_anim_flipped = (self.mario_hammer_down_walk_1_flipped,self.mario_hammer_down_walk_2_flipped)
 
         # default image is the idle sprite
         self.image = self.mario_idle
@@ -66,10 +103,12 @@ class Mario:
         self.is_moving_on_ladder = False
         self.is_dead = False
         self.is_grounded = False
+        self.has_hammer = False
         self.move_index = 0
         self.current_walk_frame = 0
         self.current_death_frame = 0
         self.current_climb_frame = 0
+        self.current_hammer_frame = 0
         self.lock_direction = False
 
         # for testing
@@ -81,7 +120,6 @@ class Mario:
 
         self.mario_start_pos_box2d = (box2d_x,box2d_y)
         
-
         # create Mario's physics body
         self.body = world.CreateDynamicBody(
             position=(box2d_x, box2d_y),
@@ -93,6 +131,9 @@ class Mario:
             friction=0.0,
             restitution=0.0,
         )
+        self.last_y_position = self.body.position.y  # set the last y position to the current y position
+
+        self.body.mass = 20
 
         self.fixture.categoryBits = MARIO_CATEGORY_BITS
         self.fixture.maskBits = GROUND_CATEGORY_BITS | LADDER_CATEGORY_BITS
@@ -104,11 +145,16 @@ class Mario:
                 # Check if Mario is touching something **below** him
                 if contact.fixtureA.body == self.body:
                     other_body = contact.fixtureB.body
+                    other_fixture = contact.fixtureB
                 else:
                     other_body = contact.fixtureA.body
+                    other_fixture = contact.fixtureA
 
                 # Ensure the object isn't another dynamic body (like a barrel)
-                if other_body.type != b2_dynamicBody:
+                # make sure the other object is below Mario (so that he can't cling to the ceiling)
+                if (other_body.type != b2_dynamicBody and 
+                    other_body.position.y < self.body.position.y and 
+                    other_fixture.filterData.categoryBits == GROUND_CATEGORY_BITS):
                     return True
         return False
     
@@ -142,12 +188,59 @@ class Mario:
                 if other_fixture.filterData.categoryBits == PAULINE_PLATFORM_CATEGORY_BITS:
                     return True
         return False
+    
+    def should_die(self):
+        # mario is already dead!
+        if self.is_dead:
+            return False 
+
+        # TODO: check if mario is touching a barrel
+        for contact_edge in self.body.contacts:
+            contact = contact_edge.contact
+            if contact.touching:
+                # Determine the other body in contact
+                if contact.fixtureA.body == self.body:
+                    other_fixture = contact.fixtureB
+                else:
+                    other_fixture = contact.fixtureA
+
+                # check if the other fixture belogns to the bottom platform (if so, mario should die)
+                if other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS:
+                    return True
 
     def update_animation(self):
         # default to idle
         self.image = self.mario_idle if self.is_facing_right else self.mario_idle_flipped
+        if self.has_hammer:
+            self.is_climbing = False
+            self.is_jumping = False
+            self.current_hammer_frame += 1
+            hammer_index = int(self.current_hammer_frame/5) % 2
+            hammer_movement = int(self.current_hammer_frame/10) % 2
+            if self.is_walking:
+                if hammer_movement == 1:
+                    self.image = (self.mario_hammer_up_walk_anim[hammer_index]
+                    if self.is_facing_right
+                    else self.mario_hammer_up_walk_anim_flipped[hammer_index])
+                else:
+                    self.image = (self.mario_hammer_down_walk_anim[hammer_index]
+                                  if self.is_facing_right
+                                  else self.mario_hammer_down_walk_anim_flipped[hammer_index]
+                                  )
+            else:
+                if hammer_movement == 1:
+                    self.image = (self.mario_hammer_idle_anim[0]
+                                if self.is_facing_right 
+                                else self.mario_hammer_idle_flipped_anim[0])
+                else:
+                    self.image = (self.mario_hammer_idle_anim[1]
+                                if self.is_facing_right 
+                                else self.mario_hammer_idle_flipped_anim[1])
 
-        if self.is_walking:
+            if self.current_hammer_frame > 720:
+                self.has_hammer = False
+
+        elif self.is_walking:
             self.current_walk_frame += 1
             if self.current_walk_frame >= 5:
                 self.current_walk_frame = 0
@@ -172,17 +265,28 @@ class Mario:
 
         if self.is_dead:
             self.body.linearVelocity = (0,0)
-            frame_duration = 30
+            frame_duration = 45
             self.lock_direction = True
+            if self.current_death_frame == 0:
+                pygame.mixer.music.unload()
+                death_sound = pygame.mixer.Sound('assets/death.wav')
+                death_sound.set_volume(0.1)
+                death_sound.play()
+
             self.current_death_frame += 1
             if self.current_death_frame > (frame_duration * 6) - 1:
                 self.current_death_frame = 0
                 self.is_dead = False
 
                 # Sets Mario back to the start
-                self.body.position = self.mario_start_pos_box2d
                 self.lock_direction = False
                 self.is_facing_right = True
+                self.send_mario_to_start()
+
+                pygame.mixer.music.load("assets/level_music.wav")
+                pygame.mixer.music.set_volume(0.5) # set the volume
+                pygame.mixer.music.play(-1)
+
 
 
             elif self.current_death_frame > frame_duration * 3:
@@ -190,6 +294,8 @@ class Mario:
                                 if self.is_facing_right
                                 else self.mario_death_animation_flipped[4]
                         )
+            elif self.current_death_frame < frame_duration * 2 - 20:
+                pass
             else:
                 current_frame = int(self.current_death_frame/ 5) % 3
                 self.image = (self.mario_death_animation[int(current_frame)]
@@ -221,9 +327,10 @@ class Mario:
         else:
             self.body.linearVelocity = (0, velocity.y)
 
-        if self.is_on_ladder():
-            self.body.gravityScale = 0  # Disable gravity while climbing
-            self.fixture.sensor = True  # Disable physical collision
+        if self.is_on_ladder() and not self.has_hammer:  # Disable gravity while climbing
+            if self.is_climbing:
+              self.body.gravityScale = 0
+              self.fixture.sensor = True  # Disable physical collision
 
             if keys[pygame.K_UP]:
                 self.body.linearVelocity = (velocity.x, MOVE_SPEED / PPM)  # Move up
@@ -252,10 +359,14 @@ class Mario:
 
         # Prevent instant jump if just climbed
         if keys[pygame.K_UP] and self.is_grounded and not self.just_climbed:
-            self.body.ApplyLinearImpulse((0, 15 * self.body.mass), self.body.worldCenter, True)
+            self.body.ApplyLinearImpulse((0, 3), self.body.worldCenter, True)
             self.is_jumping = True
+        velocity = self.body.linearVelocity
+        vertical_speed = velocity.y
+        if vertical_speed < 0.3 and not self.is_climbing:
+            self.body.ApplyLinearImpulse((0, -0.1), self.body.worldCenter, True)
 
-        if keys[pygame.K_DOWN] and not self.is_dead:
+        if self.should_die():
             self.game_state.lose_life()
             self.is_dead = True
         
@@ -269,6 +380,22 @@ class Mario:
             print("On Pauline's platform!")
             self.game_state.level_complete = True
 
+        # current_y_position = self.body.position.y
+        # fall_distance = abs(self.last_y_position - current_y_position) * PPM # fall distance in meters
+        
+        # print("Fall distance:", fall_distance)
+        # print("difference" , abs(self.last_y_position - current_y_position))
+
+
+        # # Check if Mario has fallen too far
+        # if fall_distance > FALL_THRESHOLD and not self.is_dead and not self.is_climbing and not self.is_jumping:
+        #     print("Mario has fallen too far!")
+        #     self.is_dead = True
+        #     self.game_state.lose_life()  # Call the method to handle losing a life
+
+        # # Update last Y position for the next frame
+        # self.last_y_position = current_y_position
+
         self.update_animation()
 
     def draw(self, screen):
@@ -276,15 +403,38 @@ class Mario:
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
         rect = self.image.get_rect(center=pos)
         screen.blit(self.image, rect.topleft)
+
+        if self.has_hammer:
+            if int(self.current_hammer_frame/10) % 2:
+                if self.is_facing_right:
+                    hammer_pos = (rect.topleft[0] + 5, rect.topleft[1] - 30)
+                    screen.blit(self.hammer_up, hammer_pos)
+                else:
+                    hammer_pos = (rect.topleft[0] + 12, rect.topleft[1] - 30)
+                    screen.blit(self.hammer_up_flipped, hammer_pos)
+                
+            else:
+                if self.is_facing_right:
+                    hammer_pos =(rect.topleft[0] + 40, rect.topleft[1] + 16)
+                    screen.blit(self.hammer_down, hammer_pos)
+                else:
+                    hammer_pos =(rect.topleft[0] - 40, rect.topleft[1] + 16)
+                    screen.blit(self.hammer_down_flipped, hammer_pos)
         # print(f"Mario's position: {pos}")
 
-    
     def change_mario_start_position(self,x,y):
         box2d_x = x/PPM
         box2d_y = (SCREEN_HEIGHT-y)/ PPM
         self.mario_start_pos_box2d = (box2d_x,box2d_y)
 
+    def send_mario_to_start(self):
+        self.body.position = self.mario_start_pos_box2d
 
     def return_rect(self):
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
         return self.image.get_rect(center=pos)
+    
+    def activate_mario_hammer_time(self):
+        self.has_hammer = True
+        print(True)
+

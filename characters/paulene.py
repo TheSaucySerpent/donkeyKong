@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from sprite import SpriteSheet
 
@@ -5,12 +7,12 @@ class Paulene:
     def __init__(self,position):
         self.spritesheet = SpriteSheet("assets/sprite_sheet.png") 
 
-        self.paulene_idle_sprite_one,self.paulene_idle_sprite_one_flipped  = self.spritesheet.load_sprite((0,148),width=16,height=22,scale=2)
-        self.paulene_idle_sprite_two, self.paulene_idle_sprite_two_flipped  = self.spritesheet.load_sprite((19,148),16,22,2)
+        self.paulene_idle_sprite_one,self.paulene_idle_sprite_one_flipped  = self.spritesheet.load_sprite((0,148),width=16,height=22,scale=(2,2))
+        self.paulene_idle_sprite_two, self.paulene_idle_sprite_two_flipped  = self.spritesheet.load_sprite((19,148),16,22,(2,2))
 
         self.paulene_idle = [self.paulene_idle_sprite_one,self.paulene_idle_sprite_two]
 
-        self.help_text, _ = self.spritesheet.load_sprite((91,183),24,8,2)
+        self.help_text, _ = self.spritesheet.load_sprite((91,183),24,8,(2,2))
 
         self.position = position
         self.help_position = (position[0]+ 30, position[1] - 10)

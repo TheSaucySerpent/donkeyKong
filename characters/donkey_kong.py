@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from sprite import SpriteSheet
 
@@ -6,13 +8,13 @@ class Donkey_Kong:
         self.spritesheet = SpriteSheet("assets/sprite_sheet.png") 
         self.scale = 3.2
 
-        self.dk_idle, _ = self.spritesheet.load_sprite((5,258),width=41,height=32,scale=self.scale)
+        self.dk_idle, _ = self.spritesheet.load_sprite((5,258),width=41,height=32,scale=(self.scale, self.scale))
         
-        self.dk_barrel_throw_left, self.dk_barrel_throw_right = self.spritesheet.load_sprite((0,292),44,32,self.scale)
-        self.dk_barrel_throw_front, _ = self.spritesheet.load_sprite((54,292),41,32,self.scale)
+        self.dk_barrel_throw_left, self.dk_barrel_throw_right = self.spritesheet.load_sprite((0,292),44,32,(self.scale, self.scale))
+        self.dk_barrel_throw_front, _ = self.spritesheet.load_sprite((54,292),41,32,(self.scale,self.scale))
 
         self.dk_barrel_throw = [self.dk_barrel_throw_left, self.dk_barrel_throw_front, self.dk_barrel_throw_right]
-        self.dk_barrel, _ = self.spritesheet.load_sprite((72,232),17,10,3.6)
+        self.dk_barrel, _ = self.spritesheet.load_sprite((72,232),17,10,(3.6,3.6))
 
         self.position = position
         self.barrel_position = (position[0] + 34,position[1] + 60)
