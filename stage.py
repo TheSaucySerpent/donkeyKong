@@ -26,7 +26,7 @@ BARREL_SPEED = 5/PPM
 
 
 # for creation of the beams
-SLOPE = 0
+SLOPE = 1
 class SlopeDirection(Enum):
   NO_SLOPE = 0
   SLOPE_UP = 1
@@ -66,10 +66,7 @@ class Stage:
     """load all of the sprites needed for stages"""
     loaded_sprites = {}
     for name, (x, y, width, height) in SPRITE_COORDS.items():
-      if name == "ladder":
-        sprite, _ = self.spritesheet.load_sprite((x, y), width, height, scale=(3,4))
-      else:
-        sprite, _ = self.spritesheet.load_sprite((x, y), width, height) # don't need the flipped sprite for these
+      sprite, _ = self.spritesheet.load_sprite((x, y), width, height) # don't need the flipped sprite for these
       loaded_sprites[name] = sprite
     return loaded_sprites
   
@@ -89,8 +86,9 @@ class Stage:
     box2d_y = (SCREEN_HEIGHT-y)/ PPM
 
     body = self.world.CreateStaticBody(
-      position=(box2d_x, box2d_y),
-      shapes=b2PolygonShape(box=(dimensions[0]/2/PPM, dimensions[1]/2/PPM))
+        position=(box2d_x, box2d_y),
+        shapes=b2EdgeShape(vertices=[(-dimensions[0] / 2 / PPM, dimensions[1] / 2 / PPM), 
+                                      (dimensions[0] / 2 / PPM, dimensions[1] / 2 / PPM)])
     )
 
     # apply collision filtering
