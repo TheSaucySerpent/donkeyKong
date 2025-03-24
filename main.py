@@ -59,8 +59,6 @@ while running:
     mario.handle_movement(keys)
     current_stage.world.Step(dt * 50, 6, 2)
     current_stage.world.ClearForces()
-    if dt > 60:
-       new_barrel = barrel(current_stage.world, 200, 95)
 
 
     # check if Mario is on Pauline's platform
