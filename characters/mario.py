@@ -28,7 +28,7 @@ SPRITE_COORDS = {
     "Hammer_down_walk2": (90,19),
 
 }
-MOVE_SPEED = 5
+MOVE_SPEED = 3.2
 
 class Mario:
     def __init__(self, x, y, world, game_state):
@@ -332,7 +332,7 @@ class Mario:
         else:
             self.body.linearVelocity = (0, velocity.y)
 
-        if self.is_on_ladder():  # Disable gravity while climbing
+        if self.is_on_ladder() and not self.has_hammer:  # Disable gravity while climbing
             if self.is_climbing:
               self.body.gravityScale = 0
               self.fixture.sensor = True  # Disable physical collision
