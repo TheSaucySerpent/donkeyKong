@@ -379,7 +379,7 @@ def create_stages():
 
   # first floor ladders
   ladder_x = beam_width * 13
-  ladder_y = SCREEN_HEIGHT - 90
+  ladder_y = SCREEN_HEIGHT - 101
   stage1.create_ladder(ladder_x, ladder_y, double_ladder=True)
   
   # second floor ladders
