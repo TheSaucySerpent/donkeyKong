@@ -153,7 +153,8 @@ class Mario:
                     other_body = contact.fixtureA.body
 
                 # Ensure the object isn't another dynamic body (like a barrel)
-                if other_body.type != b2_dynamicBody:
+                # make sure the other object is below Mario (so that he can't cling to the ceiling)
+                if other_body.type != b2_dynamicBody and other_body.position.y < self.body.position.y:
                     return True
         return False
     
