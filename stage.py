@@ -45,7 +45,8 @@ class Stage:
 
     # create world boundaries
     self.create_boundary_wall([(0, SCREEN_HEIGHT / PPM), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])  # top wall
-    self.create_boundary_wall([(0, 0), (SCREEN_WIDTH / PPM, 0)])                                      # bottom wall
+    self.create_boundary_wall([(0, 0), (SCREEN_WIDTH / PPM, 0)],                                      # bottom wall
+                              is_bottom_boundary=True)                                      
     self.create_boundary_wall([(0, 0), (0, SCREEN_HEIGHT / PPM)])                                     # left wall
     self.create_boundary_wall([(SCREEN_WIDTH / PPM, 0), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])   # right wall
   
@@ -61,11 +62,13 @@ class Stage:
     return loaded_sprites
   
   # create the boundary walls with category bits
-  def create_boundary_wall(self, vertices):
+  def create_boundary_wall(self, vertices, is_bottom_boundary=False):
       wall_body = self.world.CreateStaticBody(shapes=b2EdgeShape(vertices=vertices))
       fixture = wall_body.fixtures[0]  # Get the default fixture created with the static body
       filterdata = fixture.filterData
       filterdata.categoryBits = WORLD_BOUNDARY_CATEGORY_BITS
+      if is_bottom_boundary:
+         filterdata.categoryBits = BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS # special category for bottom boundary
       fixture.filterData = filterdata
 
   
