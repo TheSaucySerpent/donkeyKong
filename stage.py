@@ -506,9 +506,6 @@ def create_stages():
   # create Pauline platform
   stage3.create_pauline_platform(beam_width*5, 70)
 
-  # add hammer item
-  stage3.item_sprites.add(Hammer((200,SCREEN_HEIGHT-325)))
-
   _, _, move_plat2 = stage3.create_moving_beam_row(210, beam_y-230, 1, SlopeDirection.NO_SLOPE)
 
   stage3.create_beam_row(0, beam_y-230, 4, SlopeDirection.NO_SLOPE)
