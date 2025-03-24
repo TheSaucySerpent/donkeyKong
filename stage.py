@@ -235,7 +235,8 @@ def create_stages():
   # create Pauline platform
   stage1.create_pauline_platform(beam_width*5, 70)
 
-  stage1.item_sprites.add(Hammer((300,600)))
+  # add hammer item
+  stage1.item_sprites.add(Hammer((200,SCREEN_HEIGHT-325)))
 
 
   stage2 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(100,625))
