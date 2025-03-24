@@ -6,7 +6,7 @@ from game_defines import SCREEN_WIDTH, SCREEN_HEIGHT
 from stage import create_stages
 from game_state import GameState
 from characters.mario import Mario
-from items.barrel import barrel
+
 
 FPS = 60
 LEVEL_COMPLETE_DELAY = 2.0 # delay in seconds before moving to the next level
@@ -32,8 +32,7 @@ def new_game():
   game_state = GameState()  # initialize game state
   mario_x , mario_y = current_stage.mario_start_pos
   mario = Mario(mario_x, mario_y, current_stage.world, game_state)  # create Mario
-  barrel1 = barrel(current_stage.world, 200, 95) #create barrel
-  return game_state, mario, stages, current_stage, barrel1
+  return game_state, mario, stages, current_stage, 
 
 current_stage_index = 0
 game_state, mario, stages, current_stage = new_game()

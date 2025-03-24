@@ -11,7 +11,6 @@ from characters.donkey_kong import Donkey_Kong
 from items.hammer import Hammer
 from items.paulene_hat import Paulene_Hat
 from enum import Enum
-from items.barrel import barrel
 
 # the location of each sprite in the sprite sheet,
 # along with the width and height of the sprite
