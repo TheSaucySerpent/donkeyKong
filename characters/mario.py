@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from sprite import SpriteSheet
 from Box2D import b2_dynamicBody, b2PolygonShape
@@ -339,9 +341,9 @@ class Mario:
             self.body.ApplyLinearImpulse((0, 15 * self.body.mass), self.body.worldCenter, True)
             self.is_jumping = True
 
-        if keys[pygame.K_DOWN] and not self.is_dead:
-            self.game_state.lose_life()
-            self.is_dead = True
+        # if keys[pygame.K_DOWN] and not self.is_dead:
+        #     self.game_state.lose_life()
+        #     self.is_dead = True
         
         # print("Grounded:", self.is_grounded)
         # print("Velocity:", self.body.linearVelocity)

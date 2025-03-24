@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from sprite import SpriteSheet
 from conversions import *

@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 # defines for pygame
 SCREEN_WIDTH = 768
 SCREEN_HEIGHT = 700

@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 from game_defines import PPM, SCREEN_HEIGHT
 
 def pixels_to_meters(pixels):

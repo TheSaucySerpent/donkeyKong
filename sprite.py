@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 
 SPRITE_WIDTH = 16  # original sprite width in the spritesheet

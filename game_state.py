@@ -1,3 +1,5 @@
+# Skyler Burden, Halie Numinen, Andrew Hua
+
 import pygame
 from game_defines import SCREEN_WIDTH, SCREEN_HEIGHT
 
