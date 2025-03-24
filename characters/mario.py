@@ -414,7 +414,6 @@ class Mario:
     
     def activate_mario_hammer_time(self):
         self.has_hammer = True
-        print(True)
 
     def get_hammer_rect(self):
         if not self.has_hammer:
