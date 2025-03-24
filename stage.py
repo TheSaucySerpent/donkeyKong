@@ -3,7 +3,7 @@
 import pygame
 from sprite import SpriteSheet
 from conversions import *
-from Box2D import b2World, b2PolygonShape, b2EdgeShape
+from Box2D import b2World, b2PolygonShape, b2EdgeShape, b2CircleShape, b2Vec2
 from game_defines import *
 from characters.mario import Mario
 from characters.paulene import Paulene
@@ -18,8 +18,11 @@ SPRITE_COORDS = {
   "beam": (109, 215, 16, 7),
   "ladder": (40, 211, 10, 16),
   "oil_barrel": (145, 193, 16, 16),
+  "barrel": (2,232,13,10),
   "upright_barrel": (112, 229, 10, 16)
 }
+
+BARREL_SPEED = 5/PPM
 
 
 # for creation of the beams
@@ -44,13 +47,17 @@ class Stage:
     self.world = b2World(gravity=(0, -0.01), doSleep=False)      # create the physics world
 
     self.moving_platforms = []
+    self.barrels = []
 
     # create world boundaries
-    self.create_boundary_wall([(0, SCREEN_HEIGHT / PPM), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])  # top wall
-    self.create_boundary_wall([(0, 0), (SCREEN_WIDTH / PPM, 0)],                                      # bottom wall
-                              is_bottom_boundary=True)                                      
-    self.create_boundary_wall([(0, 0), (0, SCREEN_HEIGHT / PPM)])                                     # left wall
-    self.create_boundary_wall([(SCREEN_WIDTH / PPM, 0), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])   # right wall
+    self.create_boundary_wall([(0, SCREEN_HEIGHT / PPM), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)],
+                              TOP_BOUNDARY_CATEGORY_BITS)
+    self.create_boundary_wall([(0, 0), (SCREEN_WIDTH / PPM, 0)],
+                              BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS)
+    self.create_boundary_wall([(0, 0), (0, SCREEN_HEIGHT / PPM)],
+                              LEFT_WORLD_BOUNDARY_CATEGORY_BITS)
+    self.create_boundary_wall([(SCREEN_WIDTH / PPM, 0), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)],
+                              RIGHT_WORLD_BOUNDARY_CATEGORY_BITS)
   
   def get_world(self):
     return self.world
@@ -67,13 +74,11 @@ class Stage:
     return loaded_sprites
   
   # create the boundary walls with category bits
-  def create_boundary_wall(self, vertices, is_bottom_boundary=False):
+  def create_boundary_wall(self, vertices, category_bits):
       wall_body = self.world.CreateStaticBody(shapes=b2EdgeShape(vertices=vertices))
       fixture = wall_body.fixtures[0]  # Get the default fixture created with the static body
       filterdata = fixture.filterData
-      filterdata.categoryBits = WORLD_BOUNDARY_CATEGORY_BITS
-      if is_bottom_boundary:
-         filterdata.categoryBits = BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS # special category for bottom boundary
+      filterdata.categoryBits = category_bits
       fixture.filterData = filterdata
 
   
@@ -160,6 +165,55 @@ class Stage:
 
     # return the x and y of the last beam created
     return beam_x, beam_y, body
+  
+  def add_barrel(self, x, y):
+    # convert screen coordinates to Box2D coordinates
+    box2d_x = x / PPM
+    box2d_y = (SCREEN_HEIGHT - y) / PPM
+
+    # get the radius
+    radius = self.sprites["barrel"].get_size()[0] / 2
+
+    # create the barrel as a dynamic body
+    barrel_body = self.world.CreateDynamicBody(position=(box2d_x, box2d_y))
+    barrel_body.linearVelocity = BARREL_SPEED * b2Vec2(1, 0)
+
+    # create a circular shape for the barrel
+    barrel_fixture = barrel_body.CreateFixture(
+        shape=b2CircleShape(radius=radius / PPM),  # Convert radius to Box2D units
+        density=5.0,
+        friction=0.8, 
+        restitution=0.1
+    )
+
+    # Apply collision filtering
+    filterdata = barrel_fixture.filterData
+    filterdata.categoryBits = BARREL_CATEGORY_BITS  # set the category for barrels
+    filterdata.maskBits = (MARIO_CATEGORY_BITS | GROUND_CATEGORY_BITS | TOP_BOUNDARY_CATEGORY_BITS |
+                           BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS | LEFT_WORLD_BOUNDARY_CATEGORY_BITS | RIGHT_WORLD_BOUNDARY_CATEGORY_BITS)
+    barrel_fixture.filterData = filterdata
+
+    # store the barrel's information for drawing
+    self.elements.append({"sprite": "barrel", "body": barrel_body})
+    self.barrels.append(barrel_body)
+
+    return barrel_body
+  
+  def move_barrels(self):
+    for barrel in self.barrels:
+        # check for boundary collisions
+        for contact_edge in barrel.contacts:
+            contact = contact_edge.contact
+            if contact.touching:
+                if contact.fixtureA.body == barrel:
+                    other_fixture = contact.fixtureB
+                else:
+                    other_fixture = contact.fixtureA
+
+                if other_fixture.filterData.categoryBits == LEFT_WORLD_BOUNDARY_CATEGORY_BITS:
+                  barrel.linearVelocity = BARREL_SPEED * b2Vec2(1, 0)
+                elif other_fixture.filterData.categoryBits == RIGHT_WORLD_BOUNDARY_CATEGORY_BITS:
+                  barrel.linearVelocity = -BARREL_SPEED * b2Vec2(1, 0)
 
   def create_ladder(self, x, y, double_ladder=False):
     def add_ladder(x_pos, y_pos):
@@ -330,6 +384,7 @@ def create_stages():
 
   # add hammer item
   stage1.item_sprites.add(Hammer((200,SCREEN_HEIGHT-325)))
+  stage1.add_barrel(100, 100)
 
 
   stage2 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(100,625))

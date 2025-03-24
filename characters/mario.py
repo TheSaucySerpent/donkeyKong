@@ -205,7 +205,8 @@ class Mario:
                     other_fixture = contact.fixtureA
 
                 # check if the other fixture belogns to the bottom platform (if so, mario should die)
-                if other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS:
+                if (other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS or
+                    other_fixture.filterData.categoryBits == BARREL_CATEGORY_BITS):
                     return True
 
     def update_animation(self):
