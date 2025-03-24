@@ -28,7 +28,8 @@ SPRITE_COORDS = {
     "Hammer_down_walk2": (90,19),
 
 }
-MOVE_SPEED = 3.2
+MOVE_SPEED = 5
+FALL_THRESHOLD = 8
 
 class Mario:
     def __init__(self, x, y, world, game_state):
@@ -42,9 +43,6 @@ class Mario:
         self.mario_jump, self.mario_jump_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["jump"])
 
         self.mario_ladder_climb, self.mario_ladder_climb_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["ladderclimb"])
-
-
-
 
         # Death sprites
         self.mario_death_1,self.mario_death_1_flipped  = self.spritesheet.load_sprite(SPRITE_COORDS["death1"])
@@ -62,14 +60,11 @@ class Mario:
         self.mario_hammer_down_walk_1, self.mario_hammer_down_walk_1_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk1"])
         self.mario_hammer_down_walk_2, self.mario_hammer_down_walk_2_flipped = self.spritesheet.load_sprite(SPRITE_COORDS["Hammer_down_walk2"])
 
-
-
         # Mario Hammer Sprites (The actual hammer object)
         self.hammer_up, self.hammer_up_flipped = self.spritesheet.load_sprite((3,61),10,10)
         self.hammer_down, self.hammer_down_flipped = self.spritesheet.load_sprite((18,61),17,9)
         self.hammer_up_flash, self.hammer_up_flash_flipped  = self.spritesheet.load_sprite((39,61),10,10)
         self.hammer_down_flash, self.hammer_down_flash_flipped = self.spritesheet.load_sprite((54,61),17,9)
-
 
         # create a list of frames for animations
         self.mario_walk_animation = [self.mario_walk_1, self.mario_walk_2]
@@ -91,7 +86,6 @@ class Mario:
 
         self.mario_hammer_down_walk_anim = (self.mario_hammer_down_walk_1,self.mario_hammer_down_walk_2)
         self.mario_hammer_down_walk_anim_flipped = (self.mario_hammer_down_walk_1_flipped,self.mario_hammer_down_walk_2_flipped)
-        
 
         # default image is the idle sprite
         self.image = self.mario_idle
@@ -137,6 +131,7 @@ class Mario:
             friction=0.0,
             restitution=0.0,
         )
+        self.last_y_position = self.body.position.y  # set the last y position to the current y position
 
         self.body.mass = 20
 
@@ -385,6 +380,22 @@ class Mario:
             print("On Pauline's platform!")
             self.game_state.level_complete = True
 
+        # current_y_position = self.body.position.y
+        # fall_distance = abs(self.last_y_position - current_y_position) * PPM # fall distance in meters
+        
+        # print("Fall distance:", fall_distance)
+        # print("difference" , abs(self.last_y_position - current_y_position))
+
+
+        # # Check if Mario has fallen too far
+        # if fall_distance > FALL_THRESHOLD and not self.is_dead and not self.is_climbing and not self.is_jumping:
+        #     print("Mario has fallen too far!")
+        #     self.is_dead = True
+        #     self.game_state.lose_life()  # Call the method to handle losing a life
+
+        # # Update last Y position for the next frame
+        # self.last_y_position = current_y_position
+
         self.update_animation()
 
     def draw(self, screen):
@@ -411,7 +422,6 @@ class Mario:
                     screen.blit(self.hammer_down_flipped, hammer_pos)
         # print(f"Mario's position: {pos}")
 
-    
     def change_mario_start_position(self,x,y):
         box2d_x = x/PPM
         box2d_y = (SCREEN_HEIGHT-y)/ PPM
