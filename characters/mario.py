@@ -205,7 +205,8 @@ class Mario:
                     other_fixture = contact.fixtureA
 
                 # check if the other fixture belogns to the bottom platform (if so, mario should die)
-                if other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS:
+                if (other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS or
+                    other_fixture.filterData.categoryBits == BARREL_CATEGORY_BITS):
                     return True
 
     def update_animation(self):
@@ -370,14 +371,7 @@ class Mario:
             self.game_state.lose_life()
             self.is_dead = True
         
-        # print("Grounded:", self.is_grounded)
-        # print("Velocity:", self.body.linearVelocity)
-
-        # will later want to add handling for climbing
-        if self.is_on_ladder():
-            print("On ladder!")
         if self.is_on_pauline_platform():
-            print("On Pauline's platform!")
             self.game_state.level_complete = True
 
         # current_y_position = self.body.position.y

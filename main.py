@@ -89,6 +89,8 @@ while running:
 
   current_stage.update_platform_movement()
 
+  current_stage.move_barrels()
+
   current_stage.draw(screen) # draw stage
   game_state.draw(screen)    # draw game state
   mario.draw(screen)         # draw Mario
