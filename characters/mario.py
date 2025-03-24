@@ -416,3 +416,26 @@ class Mario:
         self.has_hammer = True
         print(True)
 
+    def get_hammer_rect(self):
+        if not self.has_hammer:
+            return pygame.Rect(0,0,0,0)
+        
+        pos = box2d_to_pygame((self.body.position.x, self.body.position.y))
+        
+        if self.is_facing_right:
+            if int(self.current_hammer_frame/10) % 2:
+                hammer_pos = (pos[0] + 5, pos[1] - 30)
+                width, height = 10, 10
+            else:
+                hammer_pos = (pos[0] + 40, pos[1] + 16)
+                width, height = 17, 9
+        else:
+            if int(self.current_hammer_frame/10) % 2:
+                hammer_pos = (pos[0] + 12, pos[1] - 30)
+                width, height = 10, 10
+            else:
+                hammer_pos = (pos[0] - 40, pos[1] + 16)
+                width, height = 17, 9
+                
+        return pygame.Rect(hammer_pos[0], hammer_pos[1], width, height)
+

@@ -12,6 +12,7 @@ from items.hammer import Hammer
 from items.paulene_hat import Paulene_Hat
 from enum import Enum
 
+
 # the location of each sprite in the sprite sheet,
 # along with the width and height of the sprite
 SPRITE_COORDS = {
@@ -40,7 +41,7 @@ class Stage:
 
   
     self.mario_start_pos = mario_pos
-    self.donkey_kong = Donkey_Kong(donkey_kong_pos)
+    self.donkey_kong = Donkey_Kong(donkey_kong_pos,self)
     self.paulene = Paulene(paulene_pos)
     self.item_sprites = pygame.sprite.Group()
 
@@ -197,6 +198,9 @@ class Stage:
 
     return barrel_body
   
+  def donkey_kong_throw(self):
+     self.add_barrel(200,100)
+  
   def move_barrels(self):
     for barrel in self.barrels:
         # check for boundary collisions
@@ -212,6 +216,20 @@ class Stage:
                   barrel.linearVelocity = BARREL_SPEED * b2Vec2(1, 0)
                 elif other_fixture.filterData.categoryBits == RIGHT_WORLD_BOUNDARY_CATEGORY_BITS:
                   barrel.linearVelocity = -BARREL_SPEED * b2Vec2(1, 0)
+  def get_barrel_rect(self, barrel_body):
+    barrel_width, barrel_height = self.sprites["barrel"].get_size()
+    
+    box2d_x = barrel_body.position.x
+    box2d_y = barrel_body.position.y
+    
+
+    screen_x = box2d_x * 32
+    screen_y = SCREEN_HEIGHT - (box2d_y * 32)
+    
+    rect_x = screen_x - barrel_width // 2
+    rect_y = screen_y - barrel_height // 2
+    
+    return pygame.Rect(rect_x, rect_y, barrel_width, barrel_height)
 
   def create_ladder(self, x, y, double_ladder=False):
     def add_ladder(x_pos, y_pos):
@@ -277,6 +295,17 @@ class Stage:
 
   def update_items(self,Mario,game_state):
     self.item_sprites.update(Mario,game_state)
+
+    for barrel in self.barrels:
+       if Mario.get_hammer_rect().colliderect(self.get_barrel_rect(barrel)):
+          self.world.DestroyBody(barrel)
+          self.barrels.remove(barrel)
+          self.elements = [e for e in self.elements if e["body"] != barrel]
+          bonus_sfx = pygame.mixer.Sound('assets/Bonus_sfx.wav')
+          bonus_sfx.set_volume(0.1)
+          bonus_sfx.play()
+          game_state.add_score(100)
+
 
   def update_platform_movement(self):
      for moving_platform in self.moving_platforms:
@@ -382,7 +411,6 @@ def create_stages():
 
   # add hammer item
   stage1.item_sprites.add(Hammer((200,SCREEN_HEIGHT-325)))
-  stage1.add_barrel(100, 100)
 
 
   stage2 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(100,625))
