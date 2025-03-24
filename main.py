@@ -59,7 +59,10 @@ while running:
     mario.handle_movement(keys)
     current_stage.world.Step(dt * 50, 6, 2)
     current_stage.world.ClearForces()
-
+  
+  # clear the barrels when mario dies
+  if mario.is_dead:
+    current_stage.clear_barrels()
 
     # check if Mario is on Pauline's platform
     if mario.is_on_pauline_platform():

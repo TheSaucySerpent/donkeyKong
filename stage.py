@@ -5,7 +5,6 @@ from sprite import SpriteSheet
 from conversions import *
 from Box2D import b2World, b2PolygonShape, b2EdgeShape, b2CircleShape, b2Vec2
 from game_defines import *
-from characters.mario import Mario
 from characters.paulene import Paulene
 from characters.donkey_kong import Donkey_Kong
 from items.hammer import Hammer
@@ -318,6 +317,15 @@ class Stage:
   def update_platform_movement(self):
      for moving_platform in self.moving_platforms:
          moving_platform.move_platform()
+  
+  def clear_barrels(self):
+    for barrel in self.barrels:
+      self.world.DestroyBody(barrel)  # destroy the barrel in the physics world
+    
+    self.barrels.clear() # clear the list of barrels
+
+    # remove barrel elements from the elements list
+    self.elements = [element for element in self.elements if element["sprite"] != "barrel"]  
 
 class Moving_Platform_obj:
     def __init__(self, limit, body, speed):
