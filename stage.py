@@ -41,7 +41,7 @@ class Stage:
     self.paulene = Paulene(paulene_pos)
     self.item_sprites = pygame.sprite.Group()
 
-    self.world = b2World(gravity=(0, -10), doSleep=False)      # create the physics world
+    self.world = b2World(gravity=(0, -0.01), doSleep=False)      # create the physics world
 
     # create world boundaries
     self.create_boundary_wall([(0, SCREEN_HEIGHT / PPM), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])  # top wall

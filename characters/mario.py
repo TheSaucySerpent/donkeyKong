@@ -139,6 +139,8 @@ class Mario:
             restitution=0.0,
         )
 
+        self.body.mass = 20
+
         self.fixture.categoryBits = MARIO_CATEGORY_BITS
         self.fixture.maskBits = GROUND_CATEGORY_BITS | LADDER_CATEGORY_BITS
     
@@ -312,9 +314,10 @@ class Mario:
         else:
             self.body.linearVelocity = (0, velocity.y)
 
-        if self.is_on_ladder():
-            self.body.gravityScale = 0  # Disable gravity while climbing
-            self.fixture.sensor = True  # Disable physical collision
+        if self.is_on_ladder():  # Disable gravity while climbing
+            if self.is_climbing:
+              self.body.gravityScale = 0
+              self.fixture.sensor = True  # Disable physical collision
 
             if keys[pygame.K_UP]:
                 self.body.linearVelocity = (velocity.x, MOVE_SPEED / PPM)  # Move up
@@ -343,8 +346,12 @@ class Mario:
 
         # Prevent instant jump if just climbed
         if keys[pygame.K_UP] and self.is_grounded and not self.just_climbed:
-            self.body.ApplyLinearImpulse((0, 15 * self.body.mass), self.body.worldCenter, True)
+            self.body.ApplyLinearImpulse((0, 3), self.body.worldCenter, True)
             self.is_jumping = True
+        velocity = self.body.linearVelocity
+        vertical_speed = velocity.y
+        if vertical_speed < 0.3 and not self.is_climbing:
+            self.body.ApplyLinearImpulse((0, -0.1), self.body.worldCenter, True)
 
         # if keys[pygame.K_DOWN] and not self.is_dead:
         #     self.game_state.lose_life()
