@@ -20,7 +20,6 @@ class Hammer(pygame.sprite.Sprite):
             self.on_collision(Mario)
 
     def on_collision(self,Mario):
-
         bonus_sfx = pygame.mixer.Sound('assets/Bonus_sfx.wav')
         bonus_sfx.set_volume(0.1)
         bonus_sfx.play()

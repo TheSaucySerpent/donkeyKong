@@ -259,7 +259,7 @@ class Mario:
                 # Sets Mario back to the start
                 self.lock_direction = False
                 self.is_facing_right = True
-                self.body.position = self.mario_start_pos_box2d
+                self.send_mario_to_start()
 
                 pygame.mixer.music.load("assets/level_music.wav")
                 pygame.mixer.music.set_volume(0.5) # set the volume
@@ -385,6 +385,8 @@ class Mario:
         box2d_y = (SCREEN_HEIGHT-y)/ PPM
         self.mario_start_pos_box2d = (box2d_x,box2d_y)
 
+    def send_mario_to_start(self):
+        self.body.position = self.mario_start_pos_box2d
 
     def return_rect(self):
         pos = box2d_to_pygame((self.body.position.x, self.body.position.y))

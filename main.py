@@ -25,9 +25,10 @@ pygame.display.set_caption("Donkey Kong Arcade")
 
 def new_game():
   stages = create_stages()
-  current_stage = stages[0]
+  current_stage = stages[1]
   game_state = GameState()  # initialize game state
-  mario = Mario(200, SCREEN_HEIGHT-85, current_stage.world, game_state)  # create Mario
+  mario_x , mario_y = current_stage.mario_start_pos
+  mario = Mario(mario_x, mario_y, current_stage.world, game_state)  # create Mario
   return game_state, mario, stages, current_stage
 
 current_stage_index = 0
@@ -72,8 +73,9 @@ while running:
           print("Congratulations! You've completed all levels! Restarting...")
           current_stage_index = 0
       current_stage = stages[current_stage_index]
+      mario_x , mario_y = current_stage.mario_start_pos
       # create a new Mario with the new stage's world.
-      mario = Mario(SCREEN_WIDTH / 2 - 50, 0, current_stage.world, game_state)
+      mario = Mario(mario_x, mario_y, current_stage.world, game_state)
 
   screen.fill((0, 0, 0))     # fill the screen (black background)
   current_stage.update_items(mario, game_state)

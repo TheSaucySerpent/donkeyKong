@@ -7,6 +7,7 @@ from characters.mario import Mario
 from characters.paulene import Paulene
 from characters.donkey_kong import Donkey_Kong
 from items.hammer import Hammer
+from items.paulene_hat import Paulene_Hat
 from enum import Enum
 
 # the location of each sprite in the sprite sheet,
@@ -18,6 +19,7 @@ SPRITE_COORDS = {
   "upright_barrel": (112, 229, 10, 16)
 }
 
+
 # for creation of the beams
 SLOPE = 0
 class SlopeDirection(Enum):
@@ -26,11 +28,13 @@ class SlopeDirection(Enum):
   SLOPE_DOWN = 2
 
 class Stage:
-  def __init__(self,donkey_kong_pos, paulene_pos):
+  def __init__(self,donkey_kong_pos, paulene_pos,mario_pos):
     self.spritesheet = SpriteSheet("assets/sprite_sheet.png")  # load the spritesheet
     self.sprites = self.load_sprites()                         # load the individual sprites
     self.elements = []                                         # the elements of the stage
 
+  
+    self.mario_start_pos = mario_pos
     self.donkey_kong = Donkey_Kong(donkey_kong_pos)
     self.paulene = Paulene(paulene_pos)
     self.item_sprites = pygame.sprite.Group()
@@ -74,7 +78,7 @@ class Stage:
     # Store both the sprite key and the Box2D body for drawing
     self.elements.append({"sprite": key, "body": body})
 
-  def create_beam_row(self, start_x, start_y, num_beams, slope_direction=SlopeDirection.NO_SLOPE, category_bits=GROUND_CATEGORY_BITS):
+  def create_beam_row(self, start_x, start_y, num_beams, slope_direction=SlopeDirection.NO_SLOPE, category_bits=GROUND_CATEGORY_BITS,SLOPE = 0):
     beam_width, beam_height = self.sprites["beam"].get_size()
     for i in range(num_beams):
       beam_x = start_x + i * beam_width
@@ -156,7 +160,7 @@ class Stage:
 
 
 def create_stages():
-  stage1 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15))
+  stage1 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(200, SCREEN_HEIGHT-85))
 
   beam_width, beam_height = stage1.sprites["beam"].get_size()
   oil_barrel_width, oil_barrel_height = stage1.sprites["oil_barrel"].get_size()
@@ -232,6 +236,50 @@ def create_stages():
   stage1.item_sprites.add(Hammer((300,600)))
 
 
-  stage2 = Stage((0,0),(0,0))
+  stage2 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(100,625))
+  beam_width, beam_height = stage2.sprites["beam"].get_size()
+  beam_x = 0
+  beam_y = SCREEN_HEIGHT-50
+
+  # Start Beam
+  beam_x, _ = stage2.create_beam_row(beam_x, beam_y, 4, SlopeDirection.NO_SLOPE)
+
+  # Replace this beam with moving platform going left and right
+  stage2.create_beam_row(220, beam_y, 2, SlopeDirection.NO_SLOPE)
+
+
+  stage2.create_beam_row(600,beam_y, 4, SlopeDirection.NO_SLOPE)
+
+  # First floor ladder 
+  ladder_x = beam_width * 13
+  ladder_y = SCREEN_HEIGHT - 90
+  stage2.create_ladder(ladder_x, ladder_y, double_ladder=True)
+  ladder_y = SCREEN_HEIGHT - 185
+  stage2.create_ladder(ladder_x, ladder_y, double_ladder=False)
+
+  stage2.create_ladder(440, 200, double_ladder=True)
+
+  stage2.create_ladder(50, 440, double_ladder=True)
+  stage2.create_ladder(50, 340, double_ladder=True)
+
+  stage2.create_beam_row(600,beam_y- 170, 4, SlopeDirection.NO_SLOPE)
+
+  # Should be moving platforms
+  stage2.create_beam_row(300,beam_y- 170, 2, SlopeDirection.NO_SLOPE)
+  stage2.create_beam_row(200,beam_y -400, 2, SlopeDirection.NO_SLOPE)
+
+
+  stage2.create_beam_row(0,beam_y -400, 2, SlopeDirection.NO_SLOPE)
+
+
+  stage2.create_beam_row(600,beam_y- 400, 12, SlopeDirection.NO_SLOPE)
+
+  stage2.create_beam_row(0,beam_y- 170, 2, SlopeDirection.NO_SLOPE)
+  stage2.create_pauline_platform(beam_width*5, 70)
+  stage2.create_beam_row(0, beam_y-510, 10, SlopeDirection.SLOPE_DOWN)
+
+  stage2.item_sprites.add(Paulene_Hat((600,210)))
+  stage2.create_stacked_barrels(oil_barrel_width, 100)
+
 
   return [stage1, stage2]
