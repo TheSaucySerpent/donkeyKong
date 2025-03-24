@@ -60,12 +60,15 @@ while running:
     current_stage.world.Step(dt * 50, 6, 2)
     current_stage.world.ClearForces()
 
-
     # check if Mario is on Pauline's platform
     if mario.is_on_pauline_platform():
-        if not game_state.level_complete:  # only execute this once when reaching the platform
-            print("Level Complete!")
-            level_complete_time = pygame.time.get_ticks() / 1000.0  # Get the current time
+      if not game_state.level_complete:  # only execute this once when reaching the platform
+          print("Level Complete!")
+          level_complete_time = pygame.time.get_ticks() / 1000.0  # Get the current time
+    # clear the barrels when mario dies
+    elif mario.is_dead:
+      current_stage.clear_barrels()
+
 
     # If the level is complete, check if the delay has passed
     if game_state.level_complete and \
@@ -73,9 +76,9 @@ while running:
       game_state.next_level()
       current_stage_index += 1  # move to the next stage
       if current_stage_index >= len(stages):
-          # if the last stage is complete, reset to the first stage
-          print("Congratulations! You've completed all levels! Restarting...")
-          current_stage_index = 0
+        # if the last stage is complete, reset to the first stage
+        print("Congratulations! You've completed all levels! Restarting...")
+        current_stage_index = 0
       current_stage = stages[current_stage_index]
       mario_x , mario_y = current_stage.mario_start_pos
       # create a new Mario with the new stage's world.
@@ -85,7 +88,6 @@ while running:
   current_stage.update_items(mario, game_state)
 
   current_stage.update_platform_movement()
-
   current_stage.move_barrels()
 
   current_stage.draw(screen) # draw stage
