@@ -194,7 +194,7 @@ class Mario:
         if self.is_dead:
             return False 
 
-        # TODO: check if mario is touching a barrel
+        # TODO: make mario die from falling too far
         for contact_edge in self.body.contacts:
             contact = contact_edge.contact
             if contact.touching:
@@ -373,22 +373,6 @@ class Mario:
         
         if self.is_on_pauline_platform():
             self.game_state.level_complete = True
-
-        # current_y_position = self.body.position.y
-        # fall_distance = abs(self.last_y_position - current_y_position) * PPM # fall distance in meters
-        
-        # print("Fall distance:", fall_distance)
-        # print("difference" , abs(self.last_y_position - current_y_position))
-
-
-        # # Check if Mario has fallen too far
-        # if fall_distance > FALL_THRESHOLD and not self.is_dead and not self.is_climbing and not self.is_jumping:
-        #     print("Mario has fallen too far!")
-        #     self.is_dead = True
-        #     self.game_state.lose_life()  # Call the method to handle losing a life
-
-        # # Update last Y position for the next frame
-        # self.last_y_position = current_y_position
 
         self.update_animation()
 
