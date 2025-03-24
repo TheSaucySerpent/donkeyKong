@@ -4,6 +4,7 @@ from game_defines import SCREEN_WIDTH, SCREEN_HEIGHT
 from stage import create_stages
 from game_state import GameState
 from characters.mario import Mario
+from items.barrel import barrel
 
 FPS = 60
 LEVEL_COMPLETE_DELAY = 2.0 # delay in seconds before moving to the next level
@@ -28,7 +29,8 @@ def new_game():
   current_stage = stages[0]
   game_state = GameState()  # initialize game state
   mario = Mario(200, SCREEN_HEIGHT-125, current_stage.world, game_state)  # create Mario
-  return game_state, mario, stages, current_stage
+  barrel1 = barrel(current_stage.world, 200, 95) #create barrel
+  return game_state, mario, stages, current_stage, barrel1
 
 current_stage_index = 0
 game_state, mario, stages, current_stage = new_game()
@@ -55,6 +57,9 @@ while running:
     mario.handle_movement(keys)
     current_stage.world.Step(dt * 50, 6, 2)
     current_stage.world.ClearForces()
+    if dt > 60:
+       new_barrel = barrel(current_stage.world, 200, 95)
+
 
     # check if Mario is on Pauline's platform
     if mario.is_on_pauline_platform():

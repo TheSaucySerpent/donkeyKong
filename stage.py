@@ -8,6 +8,7 @@ from characters.paulene import Paulene
 from characters.donkey_kong import Donkey_Kong
 from items.hammer import Hammer
 from enum import Enum
+from items.barrel import barrel
 
 # the location of each sprite in the sprite sheet,
 # along with the width and height of the sprite
@@ -230,6 +231,22 @@ def create_stages():
   stage1.create_pauline_platform(beam_width*5, 70)
 
   stage1.item_sprites.add(Hammer((300,600)))
+  
+  #stage1.item_sprites.add(barrel((200,95)))
+  
+  #if barrel.frame_counter > 60:
+  #    stage1.item_sprites.add(barrel((200,95)))
+  #    barrel.frame_counter = 0
+
+  #for frame in barrel.frame_counter:
+    
+  #  if barrel.y > 600:
+  #    stage1.item_sprites.remove(barrel)
+  #  if barrel.x > 400:
+  #    barrel(barrel.rect.x, barrel.rect.y+100 )
+  #  else:
+  #    barrel(barrel.rect.x + 10, barrel.rect.y)
+
 
 
   stage2 = Stage((0,0),(0,0))
