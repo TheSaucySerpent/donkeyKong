@@ -149,12 +149,16 @@ class Mario:
                 # Check if Mario is touching something **below** him
                 if contact.fixtureA.body == self.body:
                     other_body = contact.fixtureB.body
+                    other_fixture = contact.fixtureB
                 else:
                     other_body = contact.fixtureA.body
+                    other_fixture = contact.fixtureA
 
                 # Ensure the object isn't another dynamic body (like a barrel)
                 # make sure the other object is below Mario (so that he can't cling to the ceiling)
-                if other_body.type != b2_dynamicBody and other_body.position.y < self.body.position.y:
+                if (other_body.type != b2_dynamicBody and 
+                    other_body.position.y < self.body.position.y and 
+                    other_fixture.filterData.categoryBits == GROUND_CATEGORY_BITS):
                     return True
         return False
     

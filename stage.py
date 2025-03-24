@@ -42,11 +42,12 @@ class Stage:
     self.item_sprites = pygame.sprite.Group()
 
     self.world = b2World(gravity=(0, -10), doSleep=False)      # create the physics world
+
     # create world boundaries
-    self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, 0), (SCREEN_WIDTH, 0)]))
-    self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, SCREEN_HEIGHT), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
-    self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(0, 0), (0, SCREEN_HEIGHT)]))
-    self.world.CreateStaticBody(position=(0, 0), shapes=b2EdgeShape(vertices=[(SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT)]))
+    self.create_boundary_wall([(0, SCREEN_HEIGHT / PPM), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])  # top wall
+    self.create_boundary_wall([(0, 0), (SCREEN_WIDTH / PPM, 0)])                                      # bottom wall
+    self.create_boundary_wall([(0, 0), (0, SCREEN_HEIGHT / PPM)])                                     # left wall
+    self.create_boundary_wall([(SCREEN_WIDTH / PPM, 0), (SCREEN_WIDTH / PPM, SCREEN_HEIGHT / PPM)])   # right wall
   
   def get_world(self):
     return self.world
@@ -58,6 +59,15 @@ class Stage:
       sprite, _ = self.spritesheet.load_sprite((x, y), width, height) # don't need the flipped sprite for these
       loaded_sprites[name] = sprite
     return loaded_sprites
+  
+  # create the boundary walls with category bits
+  def create_boundary_wall(self, vertices):
+      wall_body = self.world.CreateStaticBody(shapes=b2EdgeShape(vertices=vertices))
+      fixture = wall_body.fixtures[0]  # Get the default fixture created with the static body
+      filterdata = fixture.filterData
+      filterdata.categoryBits = WORLD_BOUNDARY_CATEGORY_BITS
+      fixture.filterData = filterdata
+
   
   def add_static_object(self, key, x, y, category_bits=GROUND_CATEGORY_BITS):
     dimensions = self.sprites[key].get_size()
