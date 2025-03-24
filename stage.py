@@ -57,7 +57,10 @@ class Stage:
     """load all of the sprites needed for stages"""
     loaded_sprites = {}
     for name, (x, y, width, height) in SPRITE_COORDS.items():
-      sprite, _ = self.spritesheet.load_sprite((x, y), width, height) # don't need the flipped sprite for these
+      if name == "ladder":
+        sprite, _ = self.spritesheet.load_sprite((x, y), width, height, scale=(3,4))
+      else:
+        sprite, _ = self.spritesheet.load_sprite((x, y), width, height) # don't need the flipped sprite for these
       loaded_sprites[name] = sprite
     return loaded_sprites
   
@@ -144,8 +147,10 @@ class Stage:
     beam_width, _ = self.sprites["beam"].get_size()
     beam_x, beam_y = self.create_beam_row(x, y, 3, SlopeDirection.NO_SLOPE, PAULINE_PLATFORM_CATEGORY_BITS)
     
-    ladder_x = beam_x + beam_width
-    ladder_y = beam_y + self.sprites["ladder"].get_size()[1] / 2
+    ladder_width, ladder_height = self.sprites["ladder"].get_size()
+
+    ladder_x = beam_x + ladder_width/2
+    ladder_y = beam_y + ladder_height/2
     self.create_ladder(ladder_x, ladder_y, double_ladder=True)
 
   def create_stacked_barrels(self, x, y):
