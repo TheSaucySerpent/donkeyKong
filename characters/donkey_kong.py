@@ -4,9 +4,10 @@ import pygame
 from sprite import SpriteSheet
 
 class Donkey_Kong:
-    def __init__(self,position,stage):
+    def __init__(self,position,stage,super=False):
         self.spritesheet = SpriteSheet("assets/sprite_sheet.png") 
         self.scale = 3.2
+        self.super = super
 
         self.dk_idle, _ = self.spritesheet.load_sprite((5,258),width=41,height=32,scale=(self.scale, self.scale))
         
@@ -30,6 +31,8 @@ class Donkey_Kong:
     
     def animate(self):
         self.anim_frame_index += 1
+        if self.super:
+            self.anim_frame_index +=1
 
         barrel_throw_start_frame = 120
         barrel_throw_end_frame = 400 - (barrel_throw_start_frame+1)

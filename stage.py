@@ -10,6 +10,7 @@ from characters.paulene import Paulene
 from characters.donkey_kong import Donkey_Kong
 from items.hammer import Hammer
 from items.paulene_hat import Paulene_Hat
+from items.paulene_umbrella import Paulene_Umbrella
 from enum import Enum
 
 
@@ -34,14 +35,14 @@ class SlopeDirection(Enum):
   SLOPE_DOWN = 2
 
 class Stage:
-  def __init__(self,donkey_kong_pos, paulene_pos,mario_pos):
+  def __init__(self,donkey_kong_pos, paulene_pos,mario_pos,dk_super=False):
     self.spritesheet = SpriteSheet("assets/sprite_sheet.png")  # load the spritesheet
     self.sprites = self.load_sprites()                         # load the individual sprites
     self.elements = []                                         # the elements of the stage
 
   
     self.mario_start_pos = mario_pos
-    self.donkey_kong = Donkey_Kong(donkey_kong_pos,self)
+    self.donkey_kong = Donkey_Kong(donkey_kong_pos,self,super=dk_super)
     self.paulene = Paulene(paulene_pos)
     self.item_sprites = pygame.sprite.Group()
 
@@ -455,6 +456,7 @@ def create_stages():
   stage2.create_beam_row(0, beam_y-510, 10, SlopeDirection.SLOPE_DOWN)
 
   stage2.item_sprites.add(Paulene_Hat((600,210)))
+  stage2.item_sprites.add(Paulene_Umbrella((200,420)))
   stage2.create_stacked_barrels(oil_barrel_width, 100)
 
   move_plat_1 = Moving_Platform_obj((5,18),move_plat1,0.05)
@@ -465,4 +467,62 @@ def create_stages():
   stage2.moving_platforms.append(move_plat_3)
 
 
-  return [stage1, stage2]
+  stage3 = Stage(donkey_kong_pos=(85,23),paulene_pos=(245,15),mario_pos=(200, SCREEN_HEIGHT-85),dk_super=True)
+
+
+  beam_x = 0
+  beam_y = SCREEN_HEIGHT-50
+
+  # first row of beams, half flat, half slope up
+  beam_x, _ = stage3.create_beam_row(beam_x, beam_y, 1, SlopeDirection.NO_SLOPE)
+  stage3.add_static_object("oil_barrel", beam_width, beam_y - beam_height/2 - oil_barrel_height/2)
+
+  _, _, move_plat1 = stage3.create_moving_beam_row(210, beam_y, 1, SlopeDirection.NO_SLOPE)
+
+
+  
+  # create final row (which holds Donkey Kong) - half flat, half slope down
+
+  stage3.create_beam_row(beam_x+beam_width, beam_y, 5, SlopeDirection.SLOPE_DOWN)
+  stage3.create_beam_row(0, beam_y-510, 10, SlopeDirection.SLOPE_DOWN)
+  # create upright barrels next to Donkey Kong
+  oil_barrel_width, upright_barrel_height = stage3.sprites["upright_barrel"].get_size()
+  stage3.create_stacked_barrels(oil_barrel_width, 100)
+  
+  # create ladders
+
+  # first floor ladders
+  ladder_x = beam_width * 13
+  ladder_y = SCREEN_HEIGHT - 101
+  stage3.create_ladder(ladder_x, ladder_y, double_ladder=True)
+  
+  # second floor ladders
+  ladder_x = beam_width * 3
+  ladder_y -= 150
+  stage3.create_ladder(ladder_x + 430, ladder_y+50, double_ladder=True)
+
+  stage3.create_beam_row(480,beam_y- 120, 3, SlopeDirection.NO_SLOPE)
+
+  # create Pauline platform
+  stage3.create_pauline_platform(beam_width*5, 70)
+
+  # add hammer item
+  stage3.item_sprites.add(Hammer((200,SCREEN_HEIGHT-325)))
+
+  _, _, move_plat2 = stage3.create_moving_beam_row(210, beam_y-230, 1, SlopeDirection.NO_SLOPE)
+
+  stage3.create_beam_row(0, beam_y-230, 4, SlopeDirection.NO_SLOPE)
+
+  move_plat_1 = Moving_Platform_obj((6,19),move_plat1,0.05)
+  move_plat_2 = Moving_Platform_obj((5,18),move_plat2,0.07)
+
+  stage3.create_beam_row(0, beam_y-340, 11, SlopeDirection.SLOPE_UP)
+
+  stage3.create_ladder(ladder_x -30, ladder_y-60, double_ladder=True)
+  stage3.create_ladder(ladder_x + 350, ladder_y-220, double_ladder=True)
+  stage3.moving_platforms.append(move_plat_1)
+  stage3.moving_platforms.append(move_plat_2)
+  
+
+
+  return [stage1, stage2,stage3]

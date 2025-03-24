@@ -3,7 +3,7 @@
 import pygame
 from sprite import SpriteSheet
 
-class Paulene_Hat(pygame.sprite.Sprite):
+class Paulene_Umbrella(pygame.sprite.Sprite):
 
     def __init__(self,position):
         super().__init__()
