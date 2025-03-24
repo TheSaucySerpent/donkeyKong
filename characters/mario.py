@@ -126,7 +126,6 @@ class Mario:
 
         self.mario_start_pos_box2d = (box2d_x,box2d_y)
         
-
         # create Mario's physics body
         self.body = world.CreateDynamicBody(
             position=(box2d_x, box2d_y),
@@ -194,6 +193,25 @@ class Mario:
                 if other_fixture.filterData.categoryBits == PAULINE_PLATFORM_CATEGORY_BITS:
                     return True
         return False
+    
+    def should_die(self):
+        # mario is already dead!
+        if self.is_dead:
+            return False 
+
+        # TODO: check if mario is touching a barrel
+        for contact_edge in self.body.contacts:
+            contact = contact_edge.contact
+            if contact.touching:
+                # Determine the other body in contact
+                if contact.fixtureA.body == self.body:
+                    other_fixture = contact.fixtureB
+                else:
+                    other_fixture = contact.fixtureA
+
+                # check if the other fixture belogns to the bottom platform (if so, mario should die)
+                if other_fixture.filterData.categoryBits == BOTTOM_WORLD_BOUNDARY_CATEGORY_BITS:
+                    return True
 
     def update_animation(self):
         # default to idle
@@ -353,9 +371,9 @@ class Mario:
         if vertical_speed < 0.3 and not self.is_climbing:
             self.body.ApplyLinearImpulse((0, -0.1), self.body.worldCenter, True)
 
-        # if keys[pygame.K_DOWN] and not self.is_dead:
-        #     self.game_state.lose_life()
-        #     self.is_dead = True
+        if self.should_die():
+            self.game_state.lose_life()
+            self.is_dead = True
         
         # print("Grounded:", self.is_grounded)
         # print("Velocity:", self.body.linearVelocity)
